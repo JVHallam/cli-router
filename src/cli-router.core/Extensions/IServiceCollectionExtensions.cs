@@ -11,46 +11,38 @@ public static class IServiceCollectionExtensions
     {
         return services
             .AddTransient<RootRoute>()
+            .AddImplementationsOfFromEntryAssembly<IRootRoutelet>()
             .AddRoutes()
         ;
     }
 
-    private static IServiceCollection AddRoutes(this IServiceCollection services)
-    {
-        return services.AddImplementationsOf<IRoute>();
-    }
-
-    //This one finds them all and registers them under the interface's type, so T[] will be injected
-    private static IServiceCollection AddImplementationsOfInterfaceAsInterface<T>(this IServiceCollection services)
-    {
-        var assembly = Assembly.GetExecutingAssembly();
-
-        var interfaceType = typeof(T);
-
-        var types = assembly.GetTypes()
-            .Where(t => interfaceType.IsAssignableFrom(t) && t is { IsClass: true, IsAbstract: false });
-
-        foreach (var impl in types)
-        {
-            services.AddTransient(interfaceType, impl);
-        }
-
-        return services;
-    }
-
-    //This one finds them all and registers them as their own selves
+    //This one finds them all and registers them under the given interface
     private static IServiceCollection AddImplementationsOf<T>(this IServiceCollection services)
     {
         var assembly = Assembly.GetExecutingAssembly();
 
+        Console.WriteLine($"Assembly: {assembly}");
+
+        return services.AddImplementationsOf<T>(assembly);
+    }
+
+    private static IServiceCollection AddImplementationsOfFromEntryAssembly<T>(this IServiceCollection services)
+    {
+        var assembly = Assembly.GetEntryAssembly();
+
+        return services.AddImplementationsOf<T>(assembly);
+    }
+
+    private static IServiceCollection AddImplementationsOf<T>(this IServiceCollection services, Assembly assembly)
+    {
         var interfaceType = typeof(T);
 
-        var types = assembly.GetTypes()
+        var implementedTypes = assembly.GetTypes()
             .Where(t => interfaceType.IsAssignableFrom(t) && t is { IsClass: true, IsAbstract: false });
 
-        foreach (var impl in types)
+        foreach (var implementedType in implementedTypes)
         {
-            services.AddTransient(impl);
+            services.AddTransient(interfaceType, implementedType);
         }
 
         return services;

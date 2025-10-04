@@ -1,10 +1,12 @@
+using System.Collections.Generic;
+
 namespace CliRouter.Core.Routes;
 
 public class RootRoute : RouterBase
 {
     public override string Name => "Root"; 
 
-    public RootRoute(IRootRoutelet[] routes) : base(routes)
+    public RootRoute(IEnumerable<IRootRoutelet> routes) : base(routes)
     {
     }
 }

@@ -9,7 +9,7 @@ public abstract class RouterBase : IRoute
 
     private readonly Dictionary<string, IRoute> _subRoutes;
 
-    public RouterBase(params IRoute[] routes)
+    public RouterBase(IEnumerable<IRoute> routes)
     {
         _subRoutes = routes.ToDictionary(x => x.Name, x => x);
     }
