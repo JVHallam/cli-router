@@ -4,8 +4,10 @@ public class TestRoutelet : INewRoutelet
 {
     public string Name => "test";
 
-    public async Task HandleAsync(string[] args)
+    public Task HandleAsync(string[] args)
     {
         System.Console.WriteLine("New Test called");
+
+        return Task.CompletedTask;
     }
 }

@@ -14,16 +14,19 @@ public abstract class RouteBase : IRoute
         _subRoutes = routes.ToDictionary(x => x.Name, x => x);
     }
 
-    //The args coming in should just be not "rsis config new etc." but trimmed "new etc."
     public async Task HandleAsync(string[] args)
     {
-        System.Console.WriteLine($"Route taken : {Name}");
+        if(args.Length < 1)
+        {
+            Console.WriteLine($"Route {Name} requires args");
+            return;
+        }
 
         var requestedRouteName = args[0];
 
-        var hasRoute = _subRoutes.TryGetValue(requestedRouteName, out IRoute requestedRoute);
+        var hasRoute = _subRoutes.TryGetValue(requestedRouteName, out IRoute? requestedRoute);
 
-        if(!hasRoute)
+        if(!hasRoute || requestedRoute is null)
         {
             //TODO: Start using a logger over raw write lines 
             Console.WriteLine($"Route {Name} doesn't have sub route {requestedRouteName}");
