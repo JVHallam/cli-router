@@ -1,22 +1,13 @@
 using CliRouter.Core.Routes;
 
-namespace CliRouter.Console.Routes;
+namespace CliRouter.Console.Routes.New;
 
 //Remove the IRoute here
-public class NewRoute : IRootRoutelet
+public class NewRoute : RouteBase, IRootRoutelet
 {
-    public string Name => "new";
+    public override string Name => "new";
 
-    public NewRoute()
+    public NewRoute(IEnumerable<INewRoutelet> routelets) : base (routelets)
     {
-    }
-
-    public async Task HandleAsync(string[] args)
-    {
-        System.Console.WriteLine("New called with following args!");
-        foreach(var arg in args)
-        {
-            System.Console.WriteLine(arg);
-        }
     }
 }

@@ -3,13 +3,13 @@ using System.Linq;
 
 namespace CliRouter.Core.Routes;
 
-public abstract class RouterBase : IRoute
+public abstract class RouteBase : IRoute
 {
     public abstract string Name { get; }
 
     private readonly Dictionary<string, IRoute> _subRoutes;
 
-    public RouterBase(IEnumerable<IRoute> routes)
+    public RouteBase(IEnumerable<IRoute> routes)
     {
         _subRoutes = routes.ToDictionary(x => x.Name, x => x);
     }

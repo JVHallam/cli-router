@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace CliRouter.Core.Routes;
 
-public class RootRoute : RouterBase
+public class RootRoute : RouteBase
 {
     public override string Name => "Root"; 
 
