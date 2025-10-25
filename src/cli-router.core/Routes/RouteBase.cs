@@ -37,4 +37,7 @@ public abstract class RouteBase : IRoute
 
         await requestedRoute.HandleAsync(trimmedArgs);
     }
+
+    public string[] GetChildRoutes()
+        => _subRoutes.Keys.ToArray();
 }

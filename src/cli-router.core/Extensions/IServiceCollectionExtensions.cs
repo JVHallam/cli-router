@@ -6,8 +6,10 @@ using CliRouter.Core.Models;
 
 namespace CliRouter.Core.Extensions;
 
+//TODO: Once integration tests are setup, clean this up. It's messy.
 public static class IServiceCollectionExtensions
 {
+    //Use this one in the real world
     public static IServiceCollection AddCliRouting(this IServiceCollection services)
     {
         return services
@@ -16,12 +18,33 @@ public static class IServiceCollectionExtensions
         ;
     }
 
-    // Find all interfaces that inherit IRoute (excluding IRoute itself)
-    // Then register all concrete classes that implement that sub class
+    //Use this one for Xunit tests for making sure it's pulling from our project, not Xunit's assembly
+    public static IServiceCollection AddCliRouting(this IServiceCollection services, Assembly assembly)
+    {
+        return services
+            .AddTransient<RootRoute>()
+            .AddRoutes(assembly)
+        ;
+    }
+
+    private static IServiceCollection AddRoutes(this IServiceCollection services, Assembly assembly)
+    {
+        var allTypes = GetAllTypes(assembly);
+
+        return services.RegisterTypes(allTypes);
+    }
+
     private static IServiceCollection AddRoutes(this IServiceCollection services)
     {
         var allTypes = GetAllTypes();
 
+        return services.RegisterTypes(allTypes);
+    }
+
+    // Find all interfaces that inherit IRoute (excluding IRoute itself)
+    // Then register all concrete classes that implement that sub class
+    private static IServiceCollection RegisterTypes(this IServiceCollection services, IEnumerable<Type> allTypes)
+    {
         var subRouteImplementationRelationships = allTypes
             .Where(IsSubInterfaceOf<IRoute>)
             .SelectMany(type => GetConcreteImplementationsOf(type, allTypes))
@@ -37,20 +60,25 @@ public static class IServiceCollectionExtensions
     }
 
     //TODO: Unit testable helper method
-    private static IEnumerable<Type> GetAllTypes()
+    private static IEnumerable<Type> GetAllTypes(params Assembly[] assemblies)
     {
-        var executingAssembly = Assembly.GetExecutingAssembly();
-        var executingAssemblyTypes = executingAssembly.GetTypes();
-
-        var entryAssembly = Assembly.GetEntryAssembly();
-
-        if(entryAssembly == null)
+        var allAssemblies = new List<Assembly>()
         {
-            return executingAssemblyTypes;
-        }
+            Assembly.GetExecutingAssembly(),
+            Assembly.GetEntryAssembly()
+        };
 
-        var entryAssemblyTypes = entryAssembly.GetTypes();
-        var allTypes = entryAssemblyTypes.Concat(executingAssemblyTypes);
+        allAssemblies = allAssemblies.Concat(assemblies).ToList();
+
+        //TODO: Change this to a select statement
+        var allTypes = new List<Type>();
+
+        foreach(var assembly in allAssemblies)
+        {
+            var assemblyTypes = assembly.GetTypes();
+
+            allTypes = allTypes.Concat(assemblyTypes).ToList();
+        }
 
         return allTypes;
     }
