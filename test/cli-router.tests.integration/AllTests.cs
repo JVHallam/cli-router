@@ -76,4 +76,10 @@ public class AllTests
         Assert.Equal(invocationArgs[0], grandChildExpectedArgs[0]);
         Assert.Equal(invocationArgs[1], grandChildExpectedArgs[1]);
     }
+
+    [Fact]
+    public async Task GivenASubRouteThatTakesAModel_WhenHandleAsyncCalled_ThenConvertsArgsIntoObject()
+    {
+
+    }
 }
