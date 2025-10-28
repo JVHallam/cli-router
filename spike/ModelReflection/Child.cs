@@ -1,18 +1,17 @@
 using Interfaces;
 using Models;
 
-public class Child : IGenericHandler<ChildRequest>
+//Child is the leaf node, It handles the calling off to business logic.
+public class Child : GenericHandler<ChildRequest>
 {
     public Child()
     {
     }
 
-    public void Handle(Object request)
+    public override void Handle(ChildRequest request)
     {
-        var actualRequest = request as ChildRequest;
-
         Console.WriteLine("Child has been invoked");
-        Console.WriteLine($"Arg1 : {actualRequest.Arg1}");
-        Console.WriteLine($"Arg2 : {actualRequest.Arg2}");
+        Console.WriteLine($"Arg1 : {request.Arg1}");
+        Console.WriteLine($"Arg2 : {request.Arg2}");
     }
 }

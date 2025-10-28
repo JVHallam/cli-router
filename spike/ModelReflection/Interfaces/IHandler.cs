@@ -1,6 +1,6 @@
 namespace Interfaces;
 
-public interface IHandler 
+public interface IHandler
 {
-    public void Handle(Object values);
+    public void Handle(string[] values);
 }
