@@ -3,38 +3,23 @@ using CliRouter.Tests.Integration.TestClasses;
 
 namespace CliRouter.Tests.Integration.Routes.Child;
 
-/*
-    I have this class, and HandleAsync takes a model, not a string[] array.
-
-    First of all, I'm going to need to use reflection to know what the model is.
-    Second of all, I'm going to need to know how many args that record takes
-*/
-
-public record RequestModel(
-        string Arg1,
-        string Arg2,
-        string Arg3
-);
-
-public class ModelGrandChildRoutelet : IChildRoutelet, ITestableRoutelet
+public class ModelGrandChildRoutelet : TemplatedRoutelet<RequestModel>, IChildRoutelet, ITestableTemplatedRoutelet<RequestModel>
 {
-    private readonly List<Invocation> _invocations;
+    private readonly List<GenericInvocation<RequestModel>> _invocations;
 
-    public List<Invocation> Invocations
+    public List<GenericInvocation<RequestModel>> Invocations
         => _invocations;
 
-    public string Name => "model";
+    public override string Name => "model-grand-child";
 
     public ModelGrandChildRoutelet()
     {
-        _invocations = new List<Invocation>();
+        _invocations = new List<GenericInvocation<RequestModel>>();
     }
 
-    public Task HandleAsync(RequestModel request)
+    public override Task HandleAsync(RequestModel request)
     {
-        _invocations.Add(new Invocation(new string[]{}));
-
-        Console.WriteLine("I was called lmfao, how? I have a model!?");
+        _invocations.Add(new GenericInvocation<RequestModel>(request));
 
         return Task.CompletedTask;
     }

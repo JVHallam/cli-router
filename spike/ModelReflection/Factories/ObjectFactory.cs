@@ -1,8 +1,15 @@
-using Interfaces;
 using Models;
+using System.Linq;
 
 public static class ObjectFactory
 {
+    public static Object[] Create(List<GenericValue> genericValues)
+    {
+        return genericValues
+            .Select(ObjectFactory.Create)
+            .ToArray();
+    }
+
     public static Object Create(GenericValue genericValue)
     {
         var ( type, value ) = genericValue;

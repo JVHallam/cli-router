@@ -64,9 +64,15 @@ public static class IServiceCollectionExtensions
     {
         var allAssemblies = new List<Assembly>()
         {
-            Assembly.GetExecutingAssembly(),
-            Assembly.GetEntryAssembly()
+            Assembly.GetExecutingAssembly()
         };
+
+        var entryAssembly = Assembly.GetEntryAssembly();
+
+        if(entryAssembly != null)
+        {
+            allAssemblies.Add(entryAssembly);
+        }
 
         allAssemblies = allAssemblies.Concat(assemblies).ToList();
 

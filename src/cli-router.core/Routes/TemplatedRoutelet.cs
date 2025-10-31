@@ -1,11 +1,15 @@
-using Interfaces;
-using Models;
+using CliRouter.Core.Models;
+using CliRouter.Core.Factories;
 
-public abstract class GenericHandler<T> : IGenericHandler<T>
+namespace CliRouter.Core.Routes;
+
+public abstract class TemplatedRoutelet<T> : ITemplatedRoute<T>
 {
-    public abstract void Handle(T request);
+    public abstract string Name { get; }
 
-    public void Handle(string[] values)
+    public abstract Task HandleAsync(T request);
+
+    public Task HandleAsync(string[] values)
     {
         var implementationTypeArgument = typeof(T);
 
@@ -15,7 +19,6 @@ public abstract class GenericHandler<T> : IGenericHandler<T>
 
         var request = DynamicFactory.CreateInstance(implementationTypeArgument, argsForConstructor);
 
-        Handle(request);
+        return HandleAsync(request);
     }
-
 }

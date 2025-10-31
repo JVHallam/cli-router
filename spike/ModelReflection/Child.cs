@@ -1,7 +1,6 @@
 using Interfaces;
 using Models;
 
-//Child is the leaf node, It handles the calling off to business logic.
 public class Child : GenericHandler<ChildRequest>
 {
     public Child()
