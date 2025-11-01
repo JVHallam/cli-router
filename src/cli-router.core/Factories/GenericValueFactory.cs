@@ -35,15 +35,15 @@ public static class GenericValueFactory
         bool wasLastValueAFlag = false;
         foreach(var value in values)
         {
-            if(wasLastValueAFlag)
-            {
-                wasLastValueAFlag = false;
-                continue;
-            }
-
             if(value.StartsWith("--"))
             {
                 wasLastValueAFlag = true;
+                continue;
+            }
+
+            if(wasLastValueAFlag)
+            {
+                wasLastValueAFlag = false;
                 continue;
             }
 
@@ -62,18 +62,18 @@ public static class GenericValueFactory
         bool wasLastValueAFlag = false;
         foreach(var value in values)
         {
-            if(wasLastValueAFlag)
-            {
-                wasLastValueAFlag = false;
-                wantedValues.Add(value);
-                continue;
-            }
-
             if(value.StartsWith("--"))
             {
                 wasLastValueAFlag = true;
                 var flagName = value.Remove(0, 2);
                 wantedValues.Add(flagName);
+                continue;
+            }
+
+            if(wasLastValueAFlag)
+            {
+                wasLastValueAFlag = false;
+                wantedValues.Add(value);
                 continue;
             }
 
@@ -87,8 +87,8 @@ public static class GenericValueFactory
         //Skip along 2 at a time
         for(int i = 0; i < wantedValues.Count; i += 2)
         {
-            var flagName = wantedValues[0];
-            var flagValue = wantedValues[1];
+            var flagName = wantedValues[i];
+            var flagValue = wantedValues[i + 1];
 
             wantedFlagValues.Add(new FlagValue(flagName, flagValue));
         }
@@ -120,18 +120,29 @@ public static class GenericValueFactory
 
     private static List<GenericValue> GetFlagGenericValues(Type type, List<FlagValue> flagValues)
     {
-        //Let's just botch it right quick
-        return flagValues
-            .Select(x => new GenericValue(typeof(string), x.Value, true))
-            .ToList();
-
-        //We want properties that have flag over them
-        /*
-        return type
+        var flagProperties = type
             .GetProperties()
-            .Where(x => x.GetCustomAttribute<FlagAttribute>() != null)
-            .Select(x => new GenericValue(x, "test", true))
+            .Where(x => x.GetCustomAttribute<FlagAttribute>() != null);
+
+        return flagProperties
+            .Select(p => CreateGenericValue(p, flagValues))
+            .Where(x => x != null)
+            .Select(x => x!)
             .ToList();
-        */
+    }
+
+    //Remember to filter out the nulls later
+    private static GenericValue? CreateGenericValue(PropertyInfo property, List<FlagValue> flagValues)
+    {
+        var flag = property.GetCustomAttribute<FlagAttribute>()!;
+
+        var matchingFlagValue = flagValues.FirstOrDefault(x => x.FlagName == flag.Name);
+
+        if(matchingFlagValue is null)
+        {
+            return null;
+        }
+
+        return new GenericValue(property.PropertyType, matchingFlagValue.Value, true);
     }
 }

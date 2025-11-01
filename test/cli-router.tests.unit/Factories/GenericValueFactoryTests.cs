@@ -58,7 +58,8 @@ public class GenericValueFactoryTests
         var type = typeof(ThreeStringConstructorWithFlagsModel);
         var args = new string[]{ 
             "one", 
-            "--flag-one", "value", 
+            "--flag-one", 
+            "value", 
             "two", 
             "--flag-two",
             "10",

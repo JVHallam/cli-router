@@ -36,6 +36,6 @@ public static class ObjectFactory
             throw new NotImplementedException($"Type : {type} not supported. Only built-in types supported");
         }
 
-        return handler(value);
+        return handler!(value);
     }
 }
