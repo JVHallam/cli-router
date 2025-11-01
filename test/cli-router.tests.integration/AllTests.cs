@@ -1,10 +1,11 @@
+using CliRouter.Core.Extensions;
+using CliRouter.Core.Models;
+using CliRouter.Core.Routes;
+using CliRouter.Tests.Integration.Routes.Child;
+using CliRouter.Tests.Integration.TestClasses;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using CliRouter.Core.Extensions;
-using CliRouter.Core.Routes;
-using CliRouter.Core.Models;
 using System.Reflection;
-using CliRouter.Tests.Integration.TestClasses;
 
 namespace CliRouter.Tests.Integration;
 
@@ -27,6 +28,28 @@ public class AllTests
             .GetRequiredService<RootRoute>();
     }
 
+    private ITestableTemplatedRoutelet<T> GetTemplatedRoutelet<T>(string name)
+    {
+        var childRoutes = _sut.GetChildRoutes();
+        var childRoute = childRoutes[0] as RouteBase;
+
+        var grandChildRoutes = childRoute!.GetChildRoutes();
+        var grandChildRoute = (grandChildRoutes.First(x => x.Name == name) as ITestableTemplatedRoutelet<T>)!;
+
+        return grandChildRoute;
+    }
+
+    private ITestableRoutelet GetRoutelet(string name)
+    {
+        var childRoutes = _sut.GetChildRoutes();
+        var childRoute = childRoutes[0] as RouteBase;
+
+        var grandChildRoutes = childRoute!.GetChildRoutes();
+        var grandChildRoute = (grandChildRoutes.First(x => x.Name == name) as ITestableRoutelet)!;
+
+        return grandChildRoute;
+    }
+
     [Fact]
     public void GivenAddCliRoutingSetup_WhenServiceResolved_ThenSubroutesDetectedAndRegisteredSuccessfully()
     {
@@ -39,29 +62,24 @@ public class AllTests
         var childRoutes = _sut.GetChildRoutes();
         var childRoute = childRoutes[0] as RouteBase;
 
-        var grandChildRoutes = childRoute!.GetChildRoutes();
-        var grandChildRoute = grandChildRoutes[0];
+        var grandChildRoute = GetRoutelet("grand-child") as IChildRoutelet;
 
         //Then Expect
         Assert.NotNull(childRoute);
         Assert.NotNull(grandChildRoute);
 
         Assert.Equal("child", childRoute.Name);
-        Assert.Equal("grandchild", grandChildRoute.Name);
+        Assert.Equal("grand-child", grandChildRoute.Name);
     }
 
     [Fact]
     public async Task GivenASubRoute_WhenHandleAsyncCalled_ThenGrandChildRouteIsInvoked()
     {
-        var grandChildExpectedArgs = new string[]{ "arg1", "arg2" };
-        var args = new string[]{ "child", "grandchild", "arg1", "arg2" };
-
         //Given
-        var childRoutes = _sut.GetChildRoutes();
-        var childRoute = childRoutes[0] as RouteBase;
+        var grandChildExpectedArgs = new string[]{ "arg1", "arg2" };
+        var args = new string[]{ "child", "grand-child", "arg1", "arg2" };
 
-        var grandChildRoutes = childRoute!.GetChildRoutes();
-        var grandChildRoute = (grandChildRoutes[0] as ITestableRoutelet)!;
+        var grandChildRoute = GetRoutelet("grand-child");
 
         //When
         await _sut.HandleAsync(args);
@@ -80,8 +98,8 @@ public class AllTests
     [Fact]
     public async Task GivenASubRouteThatTakesAModel_WhenHandleAsyncCalled_ThenConvertsArgsIntoObject()
     {
-        var args = new string[]{ "child", "model-grand-child", "hello world!", "100", "2025-05-05" };
-        var expectedArg1 = "hello world!";
+        var args = new string[]{ "child", "model-grand-child", "hello-world!", "100", "2025-05-05" };
+        var expectedArg1 = "hello-world!";
         var expectedArg2 = 100;
         var expectedArg3 = DateOnly.Parse("2025-05-05");
 
@@ -106,47 +124,46 @@ public class AllTests
         Assert.Equal(invocationArgs.Arg3, expectedArg3);
     }
 
+
     [Fact]
-    public async Task Given_When_Then2()
+    public async Task GivenACommandWithFlags_WhenHandleAsyncCalled_ThenParsesArgsAsExpected()
     {
-        //I can move onto removing Name from being an override and being a free property?!
-        //I would like this, it's a major quality of life
-        await Task.CompletedTask;
+        var args = new string[]{ 
+            "child", 
+            "flags-grand-child",
+            "arg1",
+            "--flag-1",
+            "flagonevalue",
+            "1",
+            "--flag-2",
+            "5"
+        };
+        var expectedArg1 = "arg1";
+        var expectedArg2 = 1;
+        var expectedFlag1 = "flagonevalue";
+        var expectedFlag2 = 5;
+
+        //Given
+        var grandChildRoute = GetTemplatedRoutelet<FlagsModel>("flags-grand-child");
+
+        //When
+        await _sut.HandleAsync(args);
+
+        //Then
+        var invocation = grandChildRoute.Invocations.FirstOrDefault();
+        Assert.Single(grandChildRoute.Invocations);
+        Assert.NotNull(invocation);
+
+        var invocationArgs = (invocation.Args as FlagsModel)!;
+        Assert.Equal(invocationArgs.Arg1, expectedArg1);
+        Assert.Equal(invocationArgs.Arg2, expectedArg2);
+        Assert.Equal(invocationArgs.Flag1, expectedFlag1);
+        Assert.Equal(invocationArgs.Flag2, expectedFlag2);
     }
 
     [Fact]
-    public async Task Given_When_Then3()
+    public async Task GivenAFlaggedRouteCalledWithoutFlags_WhenHandleAsyncCalled_ThenParsesArgsAsExpected()
     {
-        //I CAN WRITE SOME INTEGRATION TESTS FOR HANDLING FLAGS!
         await Task.CompletedTask;
     }
-
-    [Fact]
-    public async Task Given_When_Then6()
-    {
-        //If routes have a help override
-        //We could then output that
-        //command help 
-        /*
-           Given a command "my-command"
-           and a sub command "list" with the help field overriden
-           and a sub command "delete" that's not overriden the help field
-           When I invoke "my-command help"
-           Then I expect to see:
-
-           my-command:
-                list: lists things
-                delete
-       */
-        await Task.CompletedTask;
-    }
-
-    [Fact]
-    public async Task Given_When_Then5()
-    {
-        //I would like to not have to create the Routers 
-        //They should be dynamic created based on either namespace or folder path
-        await Task.CompletedTask;
-    }
-
 }

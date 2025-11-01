@@ -10,7 +10,7 @@ public class GrandChildRoutelet : IChildRoutelet, ITestableRoutelet
     public List<Invocation> Invocations
         => _invocations;
 
-    public string Name => "grandchild";
+    public string Name => "grand-child";
 
     public GrandChildRoutelet()
     {
