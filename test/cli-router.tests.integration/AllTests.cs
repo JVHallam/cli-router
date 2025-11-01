@@ -132,10 +132,10 @@ public class AllTests
             "child", 
             "flags-grand-child",
             "arg1",
-            "--flag-1",
+            "--flag-one",
             "flagonevalue",
             "1",
-            "--flag-2",
+            "--flag-two",
             "5"
         };
         var expectedArg1 = "arg1";
@@ -155,10 +155,10 @@ public class AllTests
         Assert.NotNull(invocation);
 
         var invocationArgs = (invocation.Args as FlagsModel)!;
-        Assert.Equal(invocationArgs.Arg1, expectedArg1);
-        Assert.Equal(invocationArgs.Arg2, expectedArg2);
-        Assert.Equal(invocationArgs.Flag1, expectedFlag1);
-        Assert.Equal(invocationArgs.Flag2, expectedFlag2);
+        Assert.Equal(expectedArg1, invocationArgs.Arg1);
+        Assert.Equal(expectedArg2, invocationArgs.Arg2);
+        Assert.Equal(expectedFlag1, invocationArgs.Flag1);
+        Assert.Equal(expectedFlag2, invocationArgs.Flag2);
     }
 
     [Fact]

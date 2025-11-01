@@ -19,6 +19,12 @@ public static class GenericValueFactory
         var flagValues = FilterForFlags(values);
         var flagGenericValues = GetFlagGenericValues(type, flagValues);
 
+        Console.WriteLine("Parsed flags");
+        foreach(var flag in flagGenericValues)
+        {
+            Console.WriteLine(flag);
+        }
+
         return constructorGenericValues
             .Concat(flagGenericValues)
             .ToList();
@@ -143,6 +149,9 @@ public static class GenericValueFactory
             return null;
         }
 
-        return new GenericValue(property.PropertyType, matchingFlagValue.Value, true);
+        return new GenericValue(property.PropertyType, matchingFlagValue.Value, true)
+        {
+            PropertyInfo = property
+        };
     }
 }

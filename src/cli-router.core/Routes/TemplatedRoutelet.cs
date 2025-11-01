@@ -15,10 +15,44 @@ public abstract class TemplatedRoutelet<T> : ITemplatedRoute<T>
 
         var genericValues = GenericValueFactory.Create(implementationTypeArgument, values);
 
-        var argsForConstructor = ObjectFactory.Create(genericValues);
+        var constructorValues = genericValues
+            .Where(x => !x.IsFlag)
+            .ToList();
+
+        var flagValues = genericValues
+            .Where(x => x.IsFlag)
+            .ToList();
+
+        var argsForConstructor = ObjectFactory.Create(constructorValues);
+
+        var argsForFlags = ObjectFactory.Create(flagValues);
 
         var request = DynamicFactory.CreateInstance(implementationTypeArgument, argsForConstructor);
 
+        HandleFlags(request, flagValues, argsForFlags);
+
         return HandleAsync(request);
+    }
+
+    public void HandleFlags(
+            dynamic targetObject, 
+            List<GenericValue> flagValues, 
+            Object[] flagsAsObjects)
+    {
+        for(int i = 0; i < flagValues.Count; ++i)
+        {
+            var propertyValue = flagValues[i];
+            var objectValue = flagsAsObjects[i];
+
+            try{
+                var property = propertyValue.PropertyInfo;
+                property.SetValue(targetObject, objectValue);
+            }
+            catch(Exception ex)
+            {
+                var message = $"Value: '{propertyValue.Value}' cannot be converted to type {propertyValue.PropertyInfo.PropertyType}";
+                throw new Exception(message, ex);
+            }
+        }
     }
 }
