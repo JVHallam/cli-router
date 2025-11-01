@@ -25,7 +25,7 @@ public static class ObjectFactory
 
     public static Object Create(GenericValue genericValue)
     {
-        var ( type, value ) = genericValue;
+        var ( type, value, isFlag ) = genericValue;
 
         var typeCode = Type.GetTypeCode(type);
 
