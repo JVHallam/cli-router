@@ -11,7 +11,7 @@ public abstract class RouteBase : IRoute
 
     public RouteBase(IEnumerable<IRoute> routes)
     {
-        _subRoutes = routes.ToDictionary(x => x.Name, x => x);
+        //_subRoutes = routes.ToDictionary(x => x.Name, x => x);
     }
 
     public async Task HandleAsync(string[] args)

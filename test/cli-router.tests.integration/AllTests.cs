@@ -9,25 +9,57 @@ using System.Reflection;
 
 namespace CliRouter.Tests.Integration;
 
+public class InvocationTracker
+{
+    public readonly List<GenericInvocation<Object>> Invocations;
+
+    public InvocationTracker()
+    {
+        Invocations = new List<GenericInvocation<Object>>();
+    }
+}
+
 public class AllTests
 {
-    private readonly RootRoute _sut;
+    private readonly Router _sut;
+    private readonly InvocationTracker _invocationTracker;
 
     public AllTests()
     {
+        _invocationTracker = new InvocationTracker();
 
         using IHost host = Host.CreateDefaultBuilder()
             .ConfigureServices((_, services) =>
             {
+                services.AddSingleton(_invocationTracker);
                 services.AddCliRouting(Assembly.GetExecutingAssembly());
             })
             .Build();
 
         _sut = host
             .Services
-            .GetRequiredService<RootRoute>();
+            .GetRequiredService<Router>();
     }
 
+    //DI works now, so we can just inject in the invocation class
+    [Fact]
+    public async Task GivenBasicArgs_WhenHandleAsyncCalled_ThenInvokesTargetRoute()
+    {
+        //Given
+        var args = new string[]{ "child", "grand-child", "solo-arg" };
+
+        //When
+        await _sut.HandleAsync(args);
+
+        //Then
+        Assert.Single(_invocationTracker.Invocations);
+        
+        var invocation = _invocationTracker.Invocations.First();
+        var invokedTypeName = invocation.InvokedRoute.GetType().Name;
+        Assert.Equal("GrandChildRoute", invokedTypeName);
+    }
+
+    /*
     private ITestableTemplatedRoutelet<T> GetTemplatedRoutelet<T>(string name)
     {
         var childRoutes = _sut.GetChildRoutes();
@@ -160,10 +192,5 @@ public class AllTests
         Assert.Equal(expectedFlag1, invocationArgs.Flag1);
         Assert.Equal(expectedFlag2, invocationArgs.Flag2);
     }
-
-    [Fact]
-    public async Task GivenAFlaggedRouteCalledWithoutFlags_WhenHandleAsyncCalled_ThenParsesArgsAsExpected()
-    {
-        await Task.CompletedTask;
-    }
+    */
 }

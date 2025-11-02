@@ -13,7 +13,7 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddCliRouting(this IServiceCollection services)
     {
         return services
-            .AddTransient<RootRoute>()
+            .AddTransient<Router>()
             .AddRoutes()
         ;
     }
@@ -22,10 +22,47 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddCliRouting(this IServiceCollection services, Assembly assembly)
     {
         return services
-            .AddTransient<RootRoute>()
-            .AddRoutes(assembly)
+            .AddTransient<Router>()
+            .AddRoutesNew(assembly)
         ;
     }
+
+    private static IServiceCollection AddRoutesNew(this IServiceCollection services, Assembly assembly)
+    {
+        var allTypes = GetAllTypes(assembly);
+
+        var interfaceType = typeof(ITemplatedRoute);
+
+        /*
+        Console.WriteLine("Types:");
+        foreach(var type in allTypes)
+        {
+            Console.WriteLine(type);
+        }
+        */
+
+        //TODO: ChatGPT stink
+        var implementations = allTypes
+            .Where(t => interfaceType.IsAssignableFrom(t)
+                        && !t.IsInterface
+                        && !t.IsAbstract
+                        && t.IsClass
+                );
+
+        Console.WriteLine("Implementations of ITemplatedRoute:");
+        foreach (var implementation in implementations)
+        {
+            Console.WriteLine($"{implementation}");
+            services.AddTransient(interfaceType, implementation);
+        }
+
+        return services;
+    }
+
+
+
+
+
 
     private static IServiceCollection AddRoutes(this IServiceCollection services, Assembly assembly)
     {
@@ -110,6 +147,13 @@ public static class IServiceCollectionExtensions
         }
 
         return true;
+    }
+
+    private static bool IsImplementationOf<T>(Type childType)
+    {
+        var parentType = typeof(T);
+
+        return IsImplementationOf(parentType, childType);
     }
 
     //TODO: Unit testable helper method

@@ -3,6 +3,7 @@ using CliRouter.Core.Factories;
 
 namespace CliRouter.Core.Routes;
 
+/*
 public abstract class TemplatedRoutelet<T> : ITemplatedRoute<T>
 {
     public abstract string Name { get; }
@@ -56,3 +57,4 @@ public abstract class TemplatedRoutelet<T> : ITemplatedRoute<T>
         }
     }
 }
+*/

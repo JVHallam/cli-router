@@ -1,0 +1,76 @@
+using System.Text.RegularExpressions;
+using CliRouter.Core.Routes;
+
+namespace CliRouter.Core.Factories;
+
+public static class FullyQualifiedRouteFactory
+{
+    public static List<FullyQualifiedRoute> Create(List<ITemplatedRoute> routes)
+    {
+        return routes
+            .Select(Create)
+            .ToList();
+    }
+
+    public static FullyQualifiedRoute Create(ITemplatedRoute route)
+    {
+        var routeName = GetRouteName(route);
+        var routeParentNames = GetNamespaceRoute(route);
+
+        var routePath = $"{routeParentNames} {routeName}".Trim();
+
+        return new FullyQualifiedRoute()
+        {
+            RoutePath = routePath,
+            Route = route
+        };
+    }
+
+    private static string GetNamespaceRoute(ITemplatedRoute route)
+    {
+        var type = route.GetType();
+        var typeNamespace = type.Namespace.ToLower();
+
+        //Split on Routes
+        var routeless = typeNamespace.Split(".routes.");
+
+        if(routeless.Length <= 1)
+        {
+            return String.Empty;
+        }
+
+        var routeNames = routeless[1].Split(".");
+
+        var kebabRouteNames = routeNames
+            .Select(ConvertToKebabCase)
+            .ToArray();
+
+        var asSingleString = String.Join(" ", routeNames);
+
+        return asSingleString;
+    }
+
+    private static string GetRouteName(ITemplatedRoute route)
+    {
+        var type = route.GetType();
+
+        var typeName = type.Name;
+
+        var typeNameWithoutRoute = typeName.Replace("Route", "");
+
+        var kebabCaseName = ConvertToKebabCase(typeNameWithoutRoute);
+
+        return kebabCaseName;
+    }
+
+    private static string ConvertToKebabCase(string pascalCaseString)
+    {
+        var pattern = "(?<!^)([A-Z])";
+
+        string kebabCaseString = Regex
+            .Replace(pascalCaseString, pattern, "-$1")
+            .ToLower();
+
+        return kebabCaseString;
+    }
+}
