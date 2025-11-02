@@ -4,12 +4,13 @@ Scenario: I call a route with the required args
 Given a route with essential args
 When I call that route with the args required
 Then the route is called
-(Implemented prior to (01/11))
+(Implemented prior to 01/11/25)
 
 Scenario: I call a route with flags
 Given a route with Flags
 When I call that route with the flags in any position
 Then the args are parsed onto the model and passed to the route
+(Implemented 01/11/25)
 
 Scenario: I call a route that needs args, without the args
 Given a route with essential args
