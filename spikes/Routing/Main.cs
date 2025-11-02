@@ -16,7 +16,7 @@ public static class Main
 
         var argsAsString = String.Join(" ", args);
 
-        var routes = new List<IRoute>()
+        var routes = new List<ITemplatedRoute>()
         {
             new TopLayer(),
             new FirstLayerChild(),
@@ -55,7 +55,7 @@ public static class Main
         await route.HandleAsync(rightArgs);
     }
 
-    public static Dictionary<string, IRoute> ToDictionary(List<FullyQualifiedRoute> routes)
+    public static Dictionary<string, ITemplatedRoute> ToDictionary(List<FullyQualifiedRoute> routes)
     {
         Console.WriteLine("Routes:");
         foreach(var route in routes)
@@ -71,7 +71,7 @@ public static class Main
     }
 
     public static string? GetDeepestKeyR(
-            Dictionary<string, IRoute> routeDictionary, 
+            Dictionary<string, ITemplatedRoute> routeDictionary, 
             string currentKey)
     {
         if(String.IsNullOrEmpty(currentKey))

@@ -2,14 +2,14 @@ using System.Text.RegularExpressions;
 
 public static class FullyQualifiedRouteFactory
 {
-    public static List<FullyQualifiedRoute> Create(List<IRoute> routes)
+    public static List<FullyQualifiedRoute> Create(List<ITemplatedRoute> routes)
     {
         return routes
             .Select(Create)
             .ToList();
     }
 
-    public static FullyQualifiedRoute Create(IRoute route)
+    public static FullyQualifiedRoute Create(ITemplatedRoute route)
     {
         var routeName = GetRouteName(route);
         var routeParentNames = GetNamespaceRoute(route);
@@ -23,7 +23,7 @@ public static class FullyQualifiedRouteFactory
         };
     }
 
-    private static string GetNamespaceRoute(IRoute route)
+    private static string GetNamespaceRoute(ITemplatedRoute route)
     {
         var type = route.GetType();
         var typeNamespace = type.Namespace;
@@ -47,7 +47,7 @@ public static class FullyQualifiedRouteFactory
         return asSingleString;
     }
 
-    private static string GetRouteName(IRoute route)
+    private static string GetRouteName(ITemplatedRoute route)
     {
         var type = route.GetType();
 

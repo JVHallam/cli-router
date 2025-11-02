@@ -1,4 +1,3 @@
-public interface IRoute
+public interface IRoute : ITemplatedRoute<string[]>
 {
-    Task HandleAsync(string[] args);
 }
