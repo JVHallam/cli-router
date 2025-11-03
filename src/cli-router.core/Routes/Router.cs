@@ -46,7 +46,51 @@ public class Router
             .Skip(deepestKeyLength)
             .ToArray();
 
-        await route.HandleAsync(rightArgs);
+        //Now we need to convert that into an object, if the route requires it
+        var implementationTypeArgument = GetImplementationType(route);
+
+        Console.WriteLine($"Implementation Type Argument: {implementationTypeArgument}");
+
+        var genericValues = GenericValueFactory.Create(implementationTypeArgument, rightArgs);
+
+        var constructorValues = genericValues
+            .Where(x => !x.IsFlag)
+            .ToList();
+
+        /*
+        var flagValues = genericValues
+            .Where(x => x.IsFlag)
+            .ToList();
+        */
+
+        var argsForConstructor = ObjectFactory.Create(constructorValues);
+
+        //var argsForFlags = ObjectFactory.Create(flagValues);
+
+        var request = DynamicFactory.CreateInstance(implementationTypeArgument, argsForConstructor);
+
+        //HandleFlags(request, flagValues, argsForFlags);
+
+        await route.HandleAsync(request);
+    }
+
+    private Type GetImplementationType(ITemplatedRoute templatedRoute)
+    {
+        var implementedInterface = templatedRoute
+            .GetType()
+            .GetInterfaces()
+            .Where(x => x.IsGenericType)
+            .FirstOrDefault();
+
+        if(implementedInterface == null)
+        {
+            return typeof(string[]);
+        }
+
+        var implementationTypeArguementType = implementedInterface
+            .GetGenericArguments()[0];
+
+        return implementationTypeArguementType;
     }
 
     //TODO: Move this out, use DI and a factory method / mapper

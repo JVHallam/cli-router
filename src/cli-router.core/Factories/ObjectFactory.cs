@@ -12,7 +12,12 @@ public static class ObjectFactory
             { typeof(decimal), (input) => Decimal.Parse(input) },
             { typeof(string), (input) => input },
             { typeof(DateTime), (input) => DateTime.Parse(input) },
-            { typeof(DateOnly), (input) => DateOnly.Parse(input) }
+            { typeof(DateOnly), (input) => DateOnly.Parse(input) },
+
+            //TODO: This is starting to get messy
+            //Assuming all the args have been turned back 
+            //into a single space deliminated string 
+            { typeof(string[]), (input) => input.Split(" ")}
         };
 
 
@@ -36,6 +41,12 @@ public static class ObjectFactory
             throw new NotImplementedException($"Type : {type} not supported. Only built-in types supported");
         }
 
-        return handler!(value);
+        try{
+            return handler!(value);
+        }
+        catch(FormatException ex)
+        {
+            throw new FormatException($"{value} - could not be parsed into type {type}", ex);
+        }
     }
 }

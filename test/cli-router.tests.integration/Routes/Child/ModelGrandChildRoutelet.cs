@@ -3,21 +3,20 @@ using CliRouter.Tests.Integration.TestClasses;
 
 namespace CliRouter.Tests.Integration.Routes.Child;
 
-public class ModelGrandChildRoute : ITemplatedRoute<RequestModel>, ITestableTemplatedRoutelet<RequestModel>
+public class ModelGrandChildRoute : ITemplatedRoute<RequestModel>
 {
-    private readonly List<GenericInvocation<RequestModel>> _invocations;
+    private readonly InvocationTracker _invocationTracker;
 
-    public List<GenericInvocation<RequestModel>> Invocations
-        => _invocations;
-
-    public ModelGrandChildRoute()
+    public ModelGrandChildRoute(
+        InvocationTracker invocationTracker
+    )
     {
-        _invocations = new List<GenericInvocation<RequestModel>>();
+        _invocationTracker = invocationTracker;
     }
 
     public Task HandleAsync(RequestModel request)
     {
-        _invocations.Add(new GenericInvocation<RequestModel>(request, this));
+        _invocationTracker.Invocations.Add(new GenericInvocation<Object>(request, this));
 
         return Task.CompletedTask;
     }

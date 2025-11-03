@@ -104,6 +104,19 @@ public static class GenericValueFactory
 
     private static List<GenericValue> GetConstructorGenericValues(Type type, string[] values)
     {
+        //TODO: Better handle all array types
+        //Arrays and built in types are a little special
+        //They can't be handled this way
+        if(type == typeof(string[]))
+        {
+            //It'll be just the one string
+            var singleString = String.Join(" ", values);
+            return new List<GenericValue>()
+            {
+                new GenericValue(type, singleString, false)
+            };
+        }
+
         var constructor = type
             .GetConstructors()
             .FirstOrDefault();
@@ -118,7 +131,7 @@ public static class GenericValueFactory
 
         var genericValues = parameters
             .Select(x => x.ParameterType)
-            .Zip(values, (a, b) => new GenericValue(a,b,false))
+            .Zip(values, (paramType, value) => new GenericValue(paramType, value, false))
             .ToList(); 
 
         return genericValues;

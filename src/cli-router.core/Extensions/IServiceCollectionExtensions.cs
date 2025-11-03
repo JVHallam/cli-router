@@ -33,14 +33,6 @@ public static class IServiceCollectionExtensions
 
         var interfaceType = typeof(ITemplatedRoute);
 
-        /*
-        Console.WriteLine("Types:");
-        foreach(var type in allTypes)
-        {
-            Console.WriteLine(type);
-        }
-        */
-
         //TODO: ChatGPT stink
         var implementations = allTypes
             .Where(t => interfaceType.IsAssignableFrom(t)
@@ -49,10 +41,8 @@ public static class IServiceCollectionExtensions
                         && t.IsClass
                 );
 
-        Console.WriteLine("Implementations of ITemplatedRoute:");
         foreach (var implementation in implementations)
         {
-            Console.WriteLine($"{implementation}");
             services.AddTransient(interfaceType, implementation);
         }
 
