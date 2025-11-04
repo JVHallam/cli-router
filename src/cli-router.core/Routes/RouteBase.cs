@@ -3,6 +3,7 @@ using System.Linq;
 
 namespace CliRouter.Core.Routes;
 
+//TODO: Delete unused class
 public abstract class RouteBase : IRoute
 {
     public abstract string Name { get; }

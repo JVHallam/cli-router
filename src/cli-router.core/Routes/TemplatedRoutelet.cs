@@ -3,6 +3,7 @@ using CliRouter.Core.Factories;
 
 namespace CliRouter.Core.Routes;
 
+//TODO: Delete Unused class
 /*
 public abstract class TemplatedRoutelet<T> : ITemplatedRoute<T>
 {
