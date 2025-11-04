@@ -57,19 +57,17 @@ public class Router
             .Where(x => !x.IsFlag)
             .ToList();
 
-        /*
         var flagValues = genericValues
             .Where(x => x.IsFlag)
             .ToList();
-        */
 
         var argsForConstructor = ObjectFactory.Create(constructorValues);
 
-        //var argsForFlags = ObjectFactory.Create(flagValues);
+        var argsForFlags = ObjectFactory.Create(flagValues);
 
         var request = DynamicFactory.CreateInstance(implementationTypeArgument, argsForConstructor);
 
-        //HandleFlags(request, flagValues, argsForFlags);
+        HandleFlags(request, flagValues, argsForFlags);
 
         await route.HandleAsync(request);
     }
@@ -126,5 +124,27 @@ public class Router
         var newKey = String.Join(" ", newArgs);
 
         return GetDeepestKeyR(routeDictionary, newKey);
+    }
+
+    public void HandleFlags(
+            dynamic targetObject, 
+            List<GenericValue> flagValues, 
+            Object[] flagsAsObjects)
+    {
+        for(int i = 0; i < flagValues.Count; ++i)
+        {
+            var propertyValue = flagValues[i];
+            var objectValue = flagsAsObjects[i];
+
+            try{
+                var property = propertyValue.PropertyInfo;
+                property.SetValue(targetObject, objectValue);
+            }
+            catch(Exception ex)
+            {
+                var message = $"Value: '{propertyValue.Value}' cannot be converted to type {propertyValue.PropertyInfo.PropertyType}";
+                throw new Exception(message, ex);
+            }
+        }
     }
 }

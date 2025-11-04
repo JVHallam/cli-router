@@ -87,10 +87,10 @@ public class AllTests
         Assert.Equal(invocationArgs.Arg3, expectedArg3);
     }
 
-    /*
     [Fact]
     public async Task GivenACommandWithFlags_WhenHandleAsyncCalled_ThenParsesArgsAsExpected()
     {
+        //Given
         var args = new string[]{ 
             "child", 
             "flags-grand-child",
@@ -106,16 +106,15 @@ public class AllTests
         var expectedFlag1 = "flagonevalue";
         var expectedFlag2 = 5;
 
-        //Given
-        var grandChildRoute = GetTemplatedRoutelet<FlagsModel>("flags-grand-child");
-
         //When
         await _sut.HandleAsync(args);
 
         //Then
-        var invocation = grandChildRoute.Invocations.FirstOrDefault();
-        Assert.Single(grandChildRoute.Invocations);
-        Assert.NotNull(invocation);
+        Assert.Single(_invocationTracker.Invocations);
+        
+        var invocation = _invocationTracker.Invocations.First();
+        var invokedTypeName = invocation.InvokedRoute.GetType().Name;
+        Assert.Equal("FlagsGrandChildRoute", invokedTypeName);
 
         var invocationArgs = (invocation.Args as FlagsModel)!;
         Assert.Equal(expectedArg1, invocationArgs.Arg1);
@@ -123,5 +122,4 @@ public class AllTests
         Assert.Equal(expectedFlag1, invocationArgs.Flag1);
         Assert.Equal(expectedFlag2, invocationArgs.Flag2);
     }
-    */
 }
