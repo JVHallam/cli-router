@@ -5,15 +5,20 @@ namespace CliRouter.Core.Routes;
 
 public class Router
 {
+    private readonly IDynamicFactory _dynamicFactory;
     private Dictionary<string, ITemplatedRoute> _routes;
 
     //TODO: Should a constructor be THIS complex?
-    public Router(IEnumerable<ITemplatedRoute> routes)
+    public Router(
+        IDynamicFactory dynamicFactory,
+        IEnumerable<ITemplatedRoute> routes
+    )
     {
+        _dynamicFactory = dynamicFactory;
+
         //TODO: We want to use DI, NOT static classes
         //TODO: Also tolist when I can avoid it
         var fullyQualifiedRoutes = FullyQualifiedRouteFactory.Create(routes.ToList());
-
         _routes = ToDictionary(fullyQualifiedRoutes);
     }
 
@@ -22,14 +27,6 @@ public class Router
         var argsAsString = String.Join(" ", args);
 
         var deepestKey = GetDeepestKeyR(_routes, argsAsString);
-
-        Console.WriteLine($"Key that was matched: {deepestKey}");
-
-        Console.WriteLine("keys");
-        foreach(var key in _routes.Keys)
-        {
-            Console.WriteLine(key);
-        }
 
         if(deepestKey == null)
         {
@@ -49,8 +46,6 @@ public class Router
         //Now we need to convert that into an object, if the route requires it
         var implementationTypeArgument = GetImplementationType(route);
 
-        Console.WriteLine($"Implementation Type Argument: {implementationTypeArgument}");
-
         var genericValues = GenericValueFactory.Create(implementationTypeArgument, rightArgs);
 
         var constructorValues = genericValues
@@ -65,13 +60,14 @@ public class Router
 
         var argsForFlags = ObjectFactory.Create(flagValues);
 
-        var request = DynamicFactory.CreateInstance(implementationTypeArgument, argsForConstructor);
+        var request = _dynamicFactory.CreateInstance(implementationTypeArgument, argsForConstructor);
 
         HandleFlags(request, flagValues, argsForFlags);
 
         await route.HandleAsync(request);
     }
 
+    //TODO: Might be better inside of the TypeFinder/TypeManagerService
     private Type GetImplementationType(ITemplatedRoute templatedRoute)
     {
         var implementedInterface = templatedRoute
@@ -126,6 +122,7 @@ public class Router
         return GetDeepestKeyR(routeDictionary, newKey);
     }
 
+    //TODO: This just feels so wrong. So wrong.
     public void HandleFlags(
             dynamic targetObject, 
             List<GenericValue> flagValues, 

@@ -26,6 +26,7 @@ public static class FullyQualifiedRouteFactory
         };
     }
 
+    //More a string Factory method
     private static string GetNamespaceRoute(ITemplatedRoute route)
     {
         var type = route.GetType();
@@ -50,6 +51,7 @@ public static class FullyQualifiedRouteFactory
         return asSingleString;
     }
 
+    //More a string factory method
     private static string GetRouteName(ITemplatedRoute route)
     {
         var type = route.GetType();

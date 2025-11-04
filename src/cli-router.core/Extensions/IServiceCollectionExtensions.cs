@@ -5,6 +5,7 @@ using System.Reflection;
 using CliRouter.Core.Models;
 using CliRouter.Core.Checkers;
 using CliRouter.Core.Finders;
+using CliRouter.Core.Factories;
 
 namespace CliRouter.Core.Extensions;
 
@@ -16,6 +17,7 @@ public static class IServiceCollectionExtensions
         return services
             .AddTransient<Router>()
             .AddRoutes()
+            .AddFactories()
         ;
     }
 
@@ -25,23 +27,34 @@ public static class IServiceCollectionExtensions
         return services
             .AddTransient<Router>()
             .AddRoutes(assembly)
+            .AddFactories()
         ;
     }
 
     private static IServiceCollection AddRoutes(this IServiceCollection services, params Assembly[] assembly)
+        => services.AddImplementationsOf<ITemplatedRoute>(assembly);
+
+    private static IServiceCollection AddImplementationsOf<T>(this IServiceCollection services, params Assembly[] assemblies)
     {
-        var allTypes = TypeFinder.GetAllTypes(assembly);
+        var allTypes = TypeFinder.GetAllTypes(assemblies);
 
         var interfaceType = typeof(ITemplatedRoute);
 
         var implementations = allTypes
-            .Where(TypeChecker.IsImplementationOf<ITemplatedRoute>);
+            .Where(TypeChecker.IsImplementationOf<T>);
 
         foreach (var implementation in implementations)
         {
-            services.AddTransient(interfaceType, implementation);
+            services.AddSingleton(interfaceType, implementation);
         }
 
         return services;
+    }
+
+    private static IServiceCollection AddFactories(this IServiceCollection services)
+    {
+        return services
+            .AddSingleton<IDynamicFactory, DynamicFactory>()
+        ;
     }
 }

@@ -1,11 +1,10 @@
 namespace CliRouter.Core.Factories;
 
-public static class DynamicFactory
+public class DynamicFactory : IDynamicFactory
 {
-    public static dynamic CreateInstance(Type targetType, object[] argsForConstructor)
+    public dynamic CreateInstance(Type targetType, object[] argsForConstructor)
     {
         //TODO: Need to handle some types a little better
-
         if(targetType == typeof(string[]))
         {
             //Then args for constructor has one value, being a string[]
