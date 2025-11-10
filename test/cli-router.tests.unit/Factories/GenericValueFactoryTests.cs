@@ -4,7 +4,6 @@ using CliRouter.Core.Attributes;
 
 namespace CliRouter.Tests.Unit.Core.Factories;
 
-
 public class GenericValueFactoryTests
 {
     private record ThreeStringConstructorModel(
@@ -12,6 +11,14 @@ public class GenericValueFactoryTests
         string Arg2,
         string Arg3
     );
+
+    private GenericValueFactory _sut; 
+
+    [SetUp]
+    public void SetUp()
+    {
+        _sut = new GenericValueFactory();
+    }
 
     [Test]
     public void GivenATypeAndValues_WhenCreateCalled_ThenReturnsExpectedTypes()
@@ -21,7 +28,7 @@ public class GenericValueFactoryTests
         var args = new string[]{ "one", "two", "three" };
 
         //Act
-        var result = GenericValueFactory.Create(type, args);
+        var result = _sut.Create(type, args);
 
         //Assert
         Assert.That(result.Count, Is.EqualTo(3));
@@ -67,7 +74,7 @@ public class GenericValueFactoryTests
         };
 
         //Act
-        var result = GenericValueFactory.Create(type, args);
+        var result = _sut.Create(type, args);
 
         //Assert
         Assert.That(result.Count, Is.EqualTo(5));
