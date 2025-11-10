@@ -3,16 +3,16 @@ using CliRouter.Core.Routes;
 
 namespace CliRouter.Core.Factories;
 
-public static class FullyQualifiedRouteFactory
+public class FullyQualifiedRouteFactory : IFullyQualifiedRouteFactory
 {
-    public static List<FullyQualifiedRoute> Create(List<ITemplatedRoute> routes)
+    public List<FullyQualifiedRoute> Create(List<ITemplatedRoute> routes)
     {
         return routes
             .Select(Create)
             .ToList();
     }
 
-    public static FullyQualifiedRoute Create(ITemplatedRoute route)
+    public FullyQualifiedRoute Create(ITemplatedRoute route)
     {
         var routeName = GetRouteName(route);
         var routeParentNames = GetNamespaceRoute(route);

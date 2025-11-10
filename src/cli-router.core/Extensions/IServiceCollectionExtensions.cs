@@ -15,7 +15,7 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddCliRouting(this IServiceCollection services)
     {
         return services
-            .AddTransient<Router>()
+            .AddSingleton<Router>()
             .AddRoutes()
             .AddFactories()
         ;
@@ -25,7 +25,7 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddCliRouting(this IServiceCollection services, Assembly assembly)
     {
         return services
-            .AddTransient<Router>()
+            .AddSingleton<Router>()
             .AddRoutes(assembly)
             .AddFactories()
         ;
@@ -55,6 +55,7 @@ public static class IServiceCollectionExtensions
     {
         return services
             .AddSingleton<IDynamicFactory, DynamicFactory>()
+            .AddSingleton<IFullyQualifiedRouteFactory, FullyQualifiedRouteFactory>()
         ;
     }
 }

@@ -11,14 +11,14 @@ public class Router
     //TODO: Should a constructor be THIS complex?
     public Router(
         IDynamicFactory dynamicFactory,
-        IEnumerable<ITemplatedRoute> routes
+        IEnumerable<ITemplatedRoute> routes,
+        IFullyQualifiedRouteFactory fullyQualifiedRouteFactory
     )
     {
         _dynamicFactory = dynamicFactory;
 
-        //TODO: We want to use DI, NOT static classes
         //TODO: Also tolist when I can avoid it
-        var fullyQualifiedRoutes = FullyQualifiedRouteFactory.Create(routes.ToList());
+        var fullyQualifiedRoutes = fullyQualifiedRouteFactory.Create(routes.ToList());
         _routes = ToDictionary(fullyQualifiedRoutes);
     }
 

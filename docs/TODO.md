@@ -1,4 +1,18 @@
 # TODO:
+- The mighty cleanup:
+    - Search out all non-interface classes and DI them
+        - GenericValueFactory
+
+    - Adhere to the orchestrator pattern
+        - Rename Router.cs to RouteOrchestrator
+        - Router.cs is the entry point of this project and therefore should be the orchestrator
+
+    - Refactor and break down some bulky classes
+        - GenericValueFactory.cs
+        - Router.cs
+
+    - Delete unused classes
+
 - Requirements to finish before using this in next project:
     - Handle children via interfaces
         - Instead of injecting the children into the parent one at a time

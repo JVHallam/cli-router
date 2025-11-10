@@ -1,4 +1,4 @@
-using  CliRouter.Core.Routes;
+using CliRouter.Core.Routes;
 
 namespace CliRouter.Core.Models;
 
