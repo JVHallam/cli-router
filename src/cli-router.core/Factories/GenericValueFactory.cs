@@ -14,12 +14,6 @@ public class GenericValueFactory : IGenericValueFactory
         var flagValues = FilterForFlags(values);
         var flagGenericValues = GetFlagGenericValues(type, flagValues);
 
-        Console.WriteLine("Parsed flags");
-        foreach (var flag in flagGenericValues)
-        {
-            Console.WriteLine(flag);
-        }
-
         return constructorGenericValues
             .Concat(flagGenericValues)
             .ToList();
