@@ -1,6 +1,6 @@
 namespace CliRouter.Core.Routes;
 
-public interface ITemplatedRoute 
+public interface ITemplatedRoute
 {
     Task HandleAsync(Object request);
 }
@@ -9,6 +9,6 @@ public interface ITemplatedRoute<T> : ITemplatedRoute
 {
     Task HandleAsync(T request);
 
-    Task ITemplatedRoute.HandleAsync(Object request) 
-        => this.HandleAsync((T) request);
+    Task ITemplatedRoute.HandleAsync(Object request)
+        => this.HandleAsync((T)request);
 }

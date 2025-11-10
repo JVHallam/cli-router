@@ -1,11 +1,13 @@
 # TODO:
 - The mighty cleanup:
     - Search out all non-interface classes and DI them
-        - GenericValueFactory
+
+    - Clean up the remaining compiler warnings
 
     - Adhere to the orchestrator pattern
         - Rename Router.cs to RouteOrchestrator
         - Router.cs is the entry point of this project and therefore should be the orchestrator
+        - This will require breaking stuff down into some more classes
 
     - Refactor and break down some bulky classes
         - GenericValueFactory.cs

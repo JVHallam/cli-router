@@ -13,7 +13,7 @@ public static class TypeFinder
 
         var entryAssembly = Assembly.GetEntryAssembly();
 
-        if(entryAssembly != null)
+        if (entryAssembly != null)
         {
             allAssemblies.Add(entryAssembly);
         }

@@ -6,22 +6,22 @@ public static class TypeChecker
     {
         var parentType = typeof(T);
 
-        if(!childType.IsClass)
+        if (!childType.IsClass)
         {
             return false;
         }
 
-        if(childType.IsAbstract)
+        if (childType.IsAbstract)
         {
             return false;
         }
 
-        if(childType.IsInterface)
+        if (childType.IsInterface)
         {
             return false;
         }
 
-        if(!parentType.IsAssignableFrom(childType))
+        if (!parentType.IsAssignableFrom(childType))
         {
             return false;
         }

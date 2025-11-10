@@ -3,9 +3,10 @@ using System.Linq;
 
 namespace CliRouter.Core.Factories;
 
-public static class ObjectFactory
+public class ObjectFactory : IObjectFactory
 {
-    public static Dictionary<Type, Func<string, Object>> _handlers 
+    //TODO: Should really be a set of micro classes tbh
+    private static Dictionary<Type, Func<string, Object>> _handlers
         => new Dictionary<Type, Func<string, Object>>()
         {
             { typeof(Int32), (input) => Int32.Parse(input) },
@@ -20,31 +21,31 @@ public static class ObjectFactory
             { typeof(string[]), (input) => input.Split(" ")}
         };
 
-
-    public static Object[] Create(List<GenericValue> genericValues)
+    public Object[] Create(List<GenericValue> genericValues)
     {
         return genericValues
-            .Select(ObjectFactory.Create)
+            .Select(Create)
             .ToArray();
     }
 
-    public static Object Create(GenericValue genericValue)
+    public Object Create(GenericValue genericValue)
     {
-        var ( type, value, isFlag ) = genericValue;
+        var (type, value, isFlag) = genericValue;
 
         var typeCode = Type.GetTypeCode(type);
 
         var hasHandler = _handlers.TryGetValue(type, out var handler);
 
-        if(!hasHandler)
+        if (!hasHandler)
         {
             throw new NotImplementedException($"Type : {type} not supported. Only built-in types supported");
         }
 
-        try{
+        try
+        {
             return handler!(value);
         }
-        catch(FormatException ex)
+        catch (FormatException ex)
         {
             throw new FormatException($"{value} - could not be parsed into type {type}", ex);
         }

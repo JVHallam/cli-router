@@ -1,6 +1,7 @@
 using CliRouter.Core.Extensions;
 using CliRouter.Core.Models;
 using CliRouter.Core.Routes;
+using CliRouter.Core.Orchestrators;
 using CliRouter.Tests.Integration.Routes.Child;
 using CliRouter.Tests.Integration.TestClasses;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,22 +10,9 @@ using System.Reflection;
 
 namespace CliRouter.Tests.Integration;
 
-//I don't like that this is Object. 
-//Make Generic Invocation just called Invocation, with : Type, Object, Args
-//Discard the generics
-public class InvocationTracker
-{
-    public readonly List<GenericInvocation<Object>> Invocations;
-
-    public InvocationTracker()
-    {
-        Invocations = new List<GenericInvocation<Object>>();
-    }
-}
-
 public class AllTests
 {
-    private readonly Router _sut;
+    private readonly RouteOrchestrator _sut;
     private readonly InvocationTracker _invocationTracker;
 
     public AllTests()
@@ -41,7 +29,7 @@ public class AllTests
 
         _sut = host
             .Services
-            .GetRequiredService<Router>();
+            .GetRequiredService<RouteOrchestrator>();
     }
 
     //DI works now, so we can just inject in the invocation class

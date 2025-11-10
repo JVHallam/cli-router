@@ -35,7 +35,7 @@ public class FullyQualifiedRouteFactory : IFullyQualifiedRouteFactory
         //Split on Routes
         var routeless = typeNamespace.Split(".routes.");
 
-        if(routeless.Length <= 1)
+        if (routeless.Length <= 1)
         {
             return String.Empty;
         }

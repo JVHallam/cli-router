@@ -4,14 +4,9 @@ using System.Reflection;
 
 namespace CliRouter.Core.Factories;
 
-public record FlagValue(
-    string FlagName,
-    string Value
-);
-
-public static class GenericValueFactory
+public class GenericValueFactory : IGenericValueFactory
 {
-    public static List<GenericValue> Create(Type type, string[] values)
+    public List<GenericValue> Create(Type type, string[] values)
     {
         var nonFlagValues = FilterOutFlags(values);
         var constructorGenericValues = GetConstructorGenericValues(type, nonFlagValues);
@@ -20,7 +15,7 @@ public static class GenericValueFactory
         var flagGenericValues = GetFlagGenericValues(type, flagValues);
 
         Console.WriteLine("Parsed flags");
-        foreach(var flag in flagGenericValues)
+        foreach (var flag in flagGenericValues)
         {
             Console.WriteLine(flag);
         }
@@ -39,15 +34,15 @@ public static class GenericValueFactory
 
         //TODO: Gross, ew.
         bool wasLastValueAFlag = false;
-        foreach(var value in values)
+        foreach (var value in values)
         {
-            if(value.StartsWith("--"))
+            if (value.StartsWith("--"))
             {
                 wasLastValueAFlag = true;
                 continue;
             }
 
-            if(wasLastValueAFlag)
+            if (wasLastValueAFlag)
             {
                 wasLastValueAFlag = false;
                 continue;
@@ -66,9 +61,9 @@ public static class GenericValueFactory
 
         //TODO: Gross, ew.
         bool wasLastValueAFlag = false;
-        foreach(var value in values)
+        foreach (var value in values)
         {
-            if(value.StartsWith("--"))
+            if (value.StartsWith("--"))
             {
                 wasLastValueAFlag = true;
                 var flagName = value.Remove(0, 2);
@@ -76,7 +71,7 @@ public static class GenericValueFactory
                 continue;
             }
 
-            if(wasLastValueAFlag)
+            if (wasLastValueAFlag)
             {
                 wasLastValueAFlag = false;
                 wantedValues.Add(value);
@@ -91,7 +86,7 @@ public static class GenericValueFactory
 
         //Given an array "flag-name", "flag-value", "flag-name", "flag-value";
         //Skip along 2 at a time
-        for(int i = 0; i < wantedValues.Count; i += 2)
+        for (int i = 0; i < wantedValues.Count; i += 2)
         {
             var flagName = wantedValues[i];
             var flagValue = wantedValues[i + 1];
@@ -107,7 +102,7 @@ public static class GenericValueFactory
         //TODO: Better handle all array types
         //Arrays and built in types are a little special
         //They can't be handled this way
-        if(type == typeof(string[]))
+        if (type == typeof(string[]))
         {
             //It'll be just the one string
             var singleString = String.Join(" ", values);
@@ -121,7 +116,7 @@ public static class GenericValueFactory
             .GetConstructors()
             .FirstOrDefault();
 
-        if(constructor == null)
+        if (constructor == null)
         {
             throw new NotImplementedException($"Target type {type} requires a public constructor");
         }
@@ -132,7 +127,7 @@ public static class GenericValueFactory
         var genericValues = parameters
             .Select(x => x.ParameterType)
             .Zip(values, (paramType, value) => new GenericValue(paramType, value, false))
-            .ToList(); 
+            .ToList();
 
         return genericValues;
     }
@@ -157,7 +152,7 @@ public static class GenericValueFactory
 
         var matchingFlagValue = flagValues.FirstOrDefault(x => x.FlagName == flag.Name);
 
-        if(matchingFlagValue is null)
+        if (matchingFlagValue is null)
         {
             return null;
         }

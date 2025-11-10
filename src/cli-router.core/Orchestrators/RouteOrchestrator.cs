@@ -1,21 +1,28 @@
 using System.Collections.Generic;
 using CliRouter.Core.Factories;
+using CliRouter.Core.Routes;
 
-namespace CliRouter.Core.Routes;
+namespace CliRouter.Core.Orchestrators;
 
-public class Router
+public class RouteOrchestrator
 {
     private readonly IDynamicFactory _dynamicFactory;
     private Dictionary<string, ITemplatedRoute> _routes;
+    private IGenericValueFactory _genericValueFactory;
+    private IObjectFactory _objectFactory;
 
     //TODO: Should a constructor be THIS complex?
-    public Router(
+    public RouteOrchestrator(
         IDynamicFactory dynamicFactory,
         IEnumerable<ITemplatedRoute> routes,
-        IFullyQualifiedRouteFactory fullyQualifiedRouteFactory
+        IFullyQualifiedRouteFactory fullyQualifiedRouteFactory,
+        IGenericValueFactory genericValueFactory,
+        IObjectFactory objectFactory
     )
     {
         _dynamicFactory = dynamicFactory;
+        _genericValueFactory = genericValueFactory;
+        _objectFactory = objectFactory;
 
         //TODO: Also tolist when I can avoid it
         var fullyQualifiedRoutes = fullyQualifiedRouteFactory.Create(routes.ToList());
@@ -28,14 +35,14 @@ public class Router
 
         var deepestKey = GetDeepestKeyR(_routes, argsAsString);
 
-        if(deepestKey == null)
+        if (deepestKey == null)
         {
             Console.WriteLine("No key was matched!");
             return;
         }
 
         var route = _routes[deepestKey]!;
-        
+
         var deepestKeyLength = deepestKey.Split(" ").Length;
 
         //Remove that from the args
@@ -46,7 +53,7 @@ public class Router
         //Now we need to convert that into an object, if the route requires it
         var implementationTypeArgument = GetImplementationType(route);
 
-        var genericValues = GenericValueFactory.Create(implementationTypeArgument, rightArgs);
+        var genericValues = _genericValueFactory.Create(implementationTypeArgument, rightArgs);
 
         var constructorValues = genericValues
             .Where(x => !x.IsFlag)
@@ -56,9 +63,9 @@ public class Router
             .Where(x => x.IsFlag)
             .ToList();
 
-        var argsForConstructor = ObjectFactory.Create(constructorValues);
+        var argsForConstructor = _objectFactory.Create(constructorValues);
 
-        var argsForFlags = ObjectFactory.Create(flagValues);
+        var argsForFlags = _objectFactory.Create(flagValues);
 
         var request = _dynamicFactory.CreateInstance(implementationTypeArgument, argsForConstructor);
 
@@ -76,7 +83,7 @@ public class Router
             .Where(x => x.IsGenericType)
             .FirstOrDefault();
 
-        if(implementedInterface == null)
+        if (implementedInterface == null)
         {
             return typeof(string[]);
         }
@@ -97,17 +104,17 @@ public class Router
     }
 
     private static string? GetDeepestKeyR(
-            Dictionary<string, ITemplatedRoute> routeDictionary, 
+            Dictionary<string, ITemplatedRoute> routeDictionary,
             string currentKey)
     {
-        if(String.IsNullOrEmpty(currentKey))
+        if (String.IsNullOrEmpty(currentKey))
         {
             return null;
         }
 
         var hasRoute = routeDictionary.TryGetValue(currentKey, out var route);
 
-        if(hasRoute)
+        if (hasRoute)
         {
             return currentKey;
         }
@@ -124,20 +131,21 @@ public class Router
 
     //TODO: This just feels so wrong. So wrong.
     public void HandleFlags(
-            dynamic targetObject, 
-            List<GenericValue> flagValues, 
+            dynamic targetObject,
+            List<GenericValue> flagValues,
             Object[] flagsAsObjects)
     {
-        for(int i = 0; i < flagValues.Count; ++i)
+        for (int i = 0; i < flagValues.Count; ++i)
         {
             var propertyValue = flagValues[i];
             var objectValue = flagsAsObjects[i];
 
-            try{
+            try
+            {
                 var property = propertyValue.PropertyInfo;
                 property.SetValue(targetObject, objectValue);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 var message = $"Value: '{propertyValue.Value}' cannot be converted to type {propertyValue.PropertyInfo.PropertyType}";
                 throw new Exception(message, ex);
