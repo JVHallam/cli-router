@@ -1,12 +1,7 @@
 # TODO:
 - The mighty cleanup:
-    - Search out all non-interface classes and DI them
-
-    - Clean up the remaining compiler warnings
-
     - Adhere to the orchestrator pattern
-        - Rename Router.cs to RouteOrchestrator
-        - Router.cs is the entry point of this project and therefore should be the orchestrator
+        - Remove all logic for the RouteOrchestrator
         - This will require breaking stuff down into some more classes
 
     - Refactor and break down some bulky classes
@@ -15,19 +10,16 @@
 
     - Delete unused classes
 
+    - Have a unit test class for every class, even if nothing is tested
+        - This will require getting rsis working for my needs
 
 - Requirements to finish before using this in next project:
-    - Handle children via interfaces
-        - Instead of injecting the children into the parent one at a time
-            - Inject all children that implement an interface
-
-            public interface IMySubRoute : IRoute { }
-
-            - Then state in the top level method public MyRoute(IMySubRoute[] childRoutes) : base (childRoutes)
-
     - Handle the flags better
         - In the RootRoute, convert the input "cli new test --flag arg --flag2 arg2 route final" into a model
         - Pass that model along the chain, maybe alongside the current stage
+        - Flags need to be put at the end at the moment
+
+    - I need the help function. That's absolutely essential for UX
 
 # The rest:
 - Add the default sub commands to each route:

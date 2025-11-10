@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using CliRouter.Core.Factories;
 using CliRouter.Core.Routes;
+using CliRouter.Core.Services;
 
 namespace CliRouter.Core.Orchestrators;
 
@@ -10,6 +11,10 @@ public class RouteOrchestrator
     private Dictionary<string, ITemplatedRoute> _routes;
     private IGenericValueFactory _genericValueFactory;
     private IObjectFactory _objectFactory;
+    private IGenericTypeService _genericTypeService;
+    private IObjectMapper _objectMapper;
+    private IRouteKeyService _routeKeyService;
+    private IArgsService _argsService;
 
     //TODO: Should a constructor be THIS complex?
     public RouteOrchestrator(
@@ -17,41 +22,37 @@ public class RouteOrchestrator
         IEnumerable<ITemplatedRoute> routes,
         IFullyQualifiedRouteFactory fullyQualifiedRouteFactory,
         IGenericValueFactory genericValueFactory,
-        IObjectFactory objectFactory
+        IObjectFactory objectFactory,
+        IGenericTypeService genericTypeService,
+        IObjectMapper objectMapper,
+        IRouteKeyService routeKeyService,
+        IArgsService argsService
     )
     {
         _dynamicFactory = dynamicFactory;
         _genericValueFactory = genericValueFactory;
         _objectFactory = objectFactory;
+        _genericTypeService = genericTypeService;
+        _objectMapper = objectMapper;
+        _routeKeyService = routeKeyService;
+        _argsService = argsService;
 
         //TODO: Also tolist when I can avoid it
+        //This feels like something that should be done elsewhere
         var fullyQualifiedRoutes = fullyQualifiedRouteFactory.Create(routes.ToList());
-        _routes = ToDictionary(fullyQualifiedRoutes);
+        _routes = _objectMapper.ToDictionary(fullyQualifiedRoutes);
     }
 
     public async Task HandleAsync(string[] args)
     {
-        var argsAsString = String.Join(" ", args);
-
-        var deepestKey = GetDeepestKeyR(_routes, argsAsString);
-
-        if (deepestKey == null)
-        {
-            Console.WriteLine("No key was matched!");
-            return;
-        }
+        var deepestKey = _routeKeyService.GetDeepestKey(_routes, args);
 
         var route = _routes[deepestKey]!;
 
-        var deepestKeyLength = deepestKey.Split(" ").Length;
-
-        //Remove that from the args
-        var rightArgs = args
-            .Skip(deepestKeyLength)
-            .ToArray();
+        var rightArgs = _argsService.GetRouteArgsWithoutRoute(deepestKey, args);
 
         //Now we need to convert that into an object, if the route requires it
-        var implementationTypeArgument = GetImplementationType(route);
+        var implementationTypeArgument = _genericTypeService.GetImplementationTypeArgument(route);
 
         var genericValues = _genericValueFactory.Create(implementationTypeArgument, rightArgs);
 
@@ -69,91 +70,8 @@ public class RouteOrchestrator
 
         var request = _dynamicFactory.CreateInstance(implementationTypeArgument, argsForConstructor);
 
-        HandleFlags(request, flagValues, argsForFlags);
+        _objectMapper.MapFlagsOnto(request, flagValues, argsForFlags);
 
         await route.HandleAsync(request);
-    }
-
-    //TODO: Might be better inside of the TypeFinder/TypeManagerService
-    private Type GetImplementationType(ITemplatedRoute templatedRoute)
-    {
-        var implementedInterface = templatedRoute
-            .GetType()
-            .GetInterfaces()
-            .Where(x => x.IsGenericType)
-            .FirstOrDefault();
-
-        if (implementedInterface == null)
-        {
-            return typeof(string[]);
-        }
-
-        var implementationTypeArguementType = implementedInterface
-            .GetGenericArguments()[0];
-
-        return implementationTypeArguementType;
-    }
-
-    //TODO: Move this out, use DI and a factory method / mapper
-    private static Dictionary<string, ITemplatedRoute> ToDictionary(List<FullyQualifiedRoute> routes)
-    {
-        return routes.ToDictionary(
-                x => x.RoutePath,
-                x => x.Route
-            );
-    }
-
-    private static string? GetDeepestKeyR(
-            Dictionary<string, ITemplatedRoute> routeDictionary,
-            string currentKey)
-    {
-        if (String.IsNullOrEmpty(currentKey))
-        {
-            return null;
-        }
-
-        var hasRoute = routeDictionary.TryGetValue(currentKey, out var route);
-
-        if (hasRoute)
-        {
-            return currentKey;
-        }
-
-        //Otherwise, lop off the end of the key
-        var currentArgs = currentKey.Split(" ");
-
-        var newArgs = currentArgs.SkipLast(1);
-
-        var newKey = String.Join(" ", newArgs);
-
-        return GetDeepestKeyR(routeDictionary, newKey);
-    }
-
-    //TODO: This just feels so wrong. So wrong.
-    public void HandleFlags(
-            dynamic targetObject,
-            List<GenericValue> flagValues,
-            Object[] flagsAsObjects)
-    {
-        for (int i = 0; i < flagValues.Count; ++i)
-        {
-            var propertyValue = flagValues[i];
-            var objectValue = flagsAsObjects[i];
-
-            try
-            {
-                var property = propertyValue.PropertyInfo;
-                if (property == null)
-                {
-                    throw new NotImplementedException($"Property Value {propertyValue} has no property info.");
-                }
-                property.SetValue(targetObject, objectValue);
-            }
-            catch (Exception ex)
-            {
-                var message = $"Value: '{propertyValue}' cannot be converted to type the expected type";
-                throw new Exception(message, ex);
-            }
-        }
     }
 }

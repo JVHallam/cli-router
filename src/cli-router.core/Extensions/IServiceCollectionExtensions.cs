@@ -10,6 +10,7 @@ using CliRouter.Core.Orchestrators;
 using ObjectFactory = CliRouter.Core.Factories.ObjectFactory;
 using System.Collections;
 using System.Collections.Generic;
+using CliRouter.Core.Services;
 
 namespace CliRouter.Core.Extensions;
 
@@ -22,6 +23,7 @@ public static class IServiceCollectionExtensions
             .AddSingleton<RouteOrchestrator>()
             .AddRoutes()
             .AddFactories()
+            .AddServices()
         ;
     }
 
@@ -32,6 +34,27 @@ public static class IServiceCollectionExtensions
             .AddSingleton<RouteOrchestrator>()
             .AddRoutes(assembly)
             .AddFactories()
+            .AddServices()
+        ;
+    }
+
+    private static IServiceCollection AddFactories(this IServiceCollection services)
+    {
+        return services
+            .AddSingleton<IDynamicFactory, DynamicFactory>()
+            .AddSingleton<IFullyQualifiedRouteFactory, FullyQualifiedRouteFactory>()
+            .AddSingleton<IGenericValueFactory, GenericValueFactory>()
+            .AddSingleton<IObjectFactory, ObjectFactory>()
+        ;
+    }
+
+    private static IServiceCollection AddServices(this IServiceCollection services)
+    {
+        return services
+            .AddSingleton<IGenericTypeService, GenericTypeService>()
+            .AddSingleton<IObjectMapper, ObjectMapper>()
+            .AddSingleton<IRouteKeyService, RouteKeyService>()
+            .AddSingleton<IArgsService, ArgsService>()
         ;
     }
 
@@ -53,15 +76,5 @@ public static class IServiceCollectionExtensions
         }
 
         return services;
-    }
-
-    private static IServiceCollection AddFactories(this IServiceCollection services)
-    {
-        return services
-            .AddSingleton<IDynamicFactory, DynamicFactory>()
-            .AddSingleton<IFullyQualifiedRouteFactory, FullyQualifiedRouteFactory>()
-            .AddSingleton<IGenericValueFactory, GenericValueFactory>()
-            .AddSingleton<IObjectFactory, ObjectFactory>()
-        ;
     }
 }
