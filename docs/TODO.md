@@ -1,15 +1,5 @@
 # TODO:
 - The mighty cleanup:
-    - Adhere to the orchestrator pattern
-        - Remove all logic for the RouteOrchestrator
-        - This will require breaking stuff down into some more classes
-
-    - Refactor and break down some bulky classes
-        - GenericValueFactory.cs
-        - Router.cs
-
-    - Delete unused classes
-
     - Have a unit test class for every class, even if nothing is tested
         - This will require getting rsis working for my needs
 
