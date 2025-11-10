@@ -143,11 +143,15 @@ public class RouteOrchestrator
             try
             {
                 var property = propertyValue.PropertyInfo;
+                if (property == null)
+                {
+                    throw new NotImplementedException($"Property Value {propertyValue} has no property info.");
+                }
                 property.SetValue(targetObject, objectValue);
             }
             catch (Exception ex)
             {
-                var message = $"Value: '{propertyValue.Value}' cannot be converted to type {propertyValue.PropertyInfo.PropertyType}";
+                var message = $"Value: '{propertyValue}' cannot be converted to type the expected type";
                 throw new Exception(message, ex);
             }
         }

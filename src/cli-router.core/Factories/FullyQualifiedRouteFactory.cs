@@ -30,7 +30,15 @@ public class FullyQualifiedRouteFactory : IFullyQualifiedRouteFactory
     private static string GetNamespaceRoute(ITemplatedRoute route)
     {
         var type = route.GetType();
-        var typeNamespace = type.Namespace.ToLower();
+
+        var typeNamespaceInstance = type.Namespace;
+
+        if(typeNamespaceInstance == null)
+        {
+            throw new NotImplementedException($"Route {route} must exist within a namespace");
+        }
+
+        var typeNamespace = typeNamespaceInstance.ToLower();
 
         //Split on Routes
         var routeless = typeNamespace.Split(".routes.");
