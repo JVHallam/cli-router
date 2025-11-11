@@ -59,43 +59,31 @@ public class GenericValueFactoryTests
     }
 
     [Test]
-    public void GivenATypeWithFlagsAndValues_WhenCreateCalled_ThenReturnsExpectedTypes()
+    public void GivenAListOfFlagValuesOnly_WhenCreateCalled_ThenReturnsExpectedTypes()
     {
         //Arrange
         var type = typeof(ThreeStringConstructorWithFlagsModel);
-        var args = new string[]{ 
-            "one", 
-            "--flag-one", 
-            "value", 
-            "two", 
-            "--flag-two",
-            "10",
-            "three" 
+
+        var args = new List<FlagValue>()
+        {
+            new FlagValue("flag-one", "value-one"),
+            new FlagValue("flag-two", "100")
         };
 
         //Act
         var result = _sut.Create(type, args);
 
         //Assert
-        Assert.That(result.Count, Is.EqualTo(5));
-        Assert.That(result[0].Type, Is.EqualTo(typeof(string)));
-        Assert.That(result[0].Value, Is.EqualTo("one"));
-        Assert.That(result[0].IsFlag, Is.False);
+        Assert.Multiple(() => {
+            Assert.That(result.Count, Is.EqualTo(2));
+            Assert.That(result[0].Type, Is.EqualTo(typeof(string)));
+            Assert.That(result[0].Value, Is.EqualTo("value-one"));
+            Assert.That(result[0].IsFlag, Is.True);
 
-        Assert.That(result[1].Type, Is.EqualTo(typeof(string)));
-        Assert.That(result[1].Value, Is.EqualTo("two"));
-        Assert.That(result[1].IsFlag, Is.False);
+            Assert.That(result[1].Type, Is.EqualTo(typeof(int)));
+            Assert.That(result[1].Value, Is.EqualTo("100"));
+            Assert.That(result[1].IsFlag, Is.True);
+        });
 
-        Assert.That(result[2].Type, Is.EqualTo(typeof(string)));
-        Assert.That(result[2].Value, Is.EqualTo("three"));
-        Assert.That(result[2].IsFlag, Is.False);
-
-        Assert.That(result[3].Type, Is.EqualTo(typeof(string)));
-        Assert.That(result[3].Value, Is.EqualTo("value"));
-        Assert.That(result[3].IsFlag, Is.True);
-
-        Assert.That(result[4].Type, Is.EqualTo(typeof(int)));
-        Assert.That(result[4].Value, Is.EqualTo("10"));
-        Assert.That(result[4].IsFlag, Is.True);
     }
 }

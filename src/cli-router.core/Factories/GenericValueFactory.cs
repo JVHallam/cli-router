@@ -7,89 +7,10 @@ namespace CliRouter.Core.Factories;
 public class GenericValueFactory : IGenericValueFactory
 {
     public List<GenericValue> Create(Type type, string[] values)
-    {
-        var nonFlagValues = FilterOutFlags(values);
-        var constructorGenericValues = GetConstructorGenericValues(type, nonFlagValues);
+        => GetConstructorGenericValues(type, values);
 
-        var flagValues = FilterForFlags(values);
-        var flagGenericValues = GetFlagGenericValues(type, flagValues);
-
-        return constructorGenericValues
-            .Concat(flagGenericValues)
-            .ToList();
-    }
-
-    //Given "one", "--flag", "two", "three"
-    //When called
-    //Then filter for "one", "three"
-    private static string[] FilterOutFlags(string[] values)
-    {
-        var wantedValues = new List<string>();
-
-        //TODO: Gross, ew.
-        bool wasLastValueAFlag = false;
-        foreach (var value in values)
-        {
-            if (value.StartsWith("--"))
-            {
-                wasLastValueAFlag = true;
-                continue;
-            }
-
-            if (wasLastValueAFlag)
-            {
-                wasLastValueAFlag = false;
-                continue;
-            }
-
-            wasLastValueAFlag = false;
-            wantedValues.Add(value);
-        }
-
-        return wantedValues.ToArray();
-    }
-
-    private static List<FlagValue> FilterForFlags(string[] values)
-    {
-        var wantedValues = new List<string>();
-
-        //TODO: Gross, ew.
-        bool wasLastValueAFlag = false;
-        foreach (var value in values)
-        {
-            if (value.StartsWith("--"))
-            {
-                wasLastValueAFlag = true;
-                var flagName = value.Remove(0, 2);
-                wantedValues.Add(flagName);
-                continue;
-            }
-
-            if (wasLastValueAFlag)
-            {
-                wasLastValueAFlag = false;
-                wantedValues.Add(value);
-                continue;
-            }
-
-            wasLastValueAFlag = false;
-        }
-
-        //Next, you want to zip them into FlagValue classes
-        var wantedFlagValues = new List<FlagValue>();
-
-        //Given an array "flag-name", "flag-value", "flag-name", "flag-value";
-        //Skip along 2 at a time
-        for (int i = 0; i < wantedValues.Count; i += 2)
-        {
-            var flagName = wantedValues[i];
-            var flagValue = wantedValues[i + 1];
-
-            wantedFlagValues.Add(new FlagValue(flagName, flagValue));
-        }
-
-        return wantedFlagValues;
-    }
+    public List<GenericValue> Create(Type type, List<FlagValue> flagValues)
+        => GetFlagGenericValues(type, flagValues);
 
     private static List<GenericValue> GetConstructorGenericValues(Type type, string[] values)
     {

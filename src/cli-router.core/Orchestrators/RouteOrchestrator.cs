@@ -15,6 +15,7 @@ public class RouteOrchestrator
     private IObjectMapper _objectMapper;
     private IRouteKeyService _routeKeyService;
     private IArgsService _argsService;
+    private IFlagValueFactory _flagValueFactory;
 
     //TODO: Should a constructor be THIS complex?
     public RouteOrchestrator(
@@ -26,7 +27,8 @@ public class RouteOrchestrator
         IGenericTypeService genericTypeService,
         IObjectMapper objectMapper,
         IRouteKeyService routeKeyService,
-        IArgsService argsService
+        IArgsService argsService,
+        IFlagValueFactory flagValueFactory
     )
     {
         _dynamicFactory = dynamicFactory;
@@ -36,6 +38,7 @@ public class RouteOrchestrator
         _objectMapper = objectMapper;
         _routeKeyService = routeKeyService;
         _argsService = argsService;
+        _flagValueFactory = flagValueFactory;
 
         //TODO: Also tolist when I can avoid it
         //This feels like something that should be done elsewhere
@@ -45,43 +48,25 @@ public class RouteOrchestrator
 
     public async Task HandleAsync(string[] args)
     {
+        //Handle the routing
         var argsWithoutFlags = _argsService.RemoveFlags(args);
-
-        var flagsWithoutArgs = _argsService.GetFlags(args);
-
         var deepestKey = _routeKeyService.GetDeepestKey(_routes, argsWithoutFlags);
-
         var route = _routes[deepestKey]!;
 
+        //Handle the constructor args
         var rightArgs = _argsService.GetRouteArgsWithoutRoute(deepestKey, argsWithoutFlags);
-
         var implementationTypeArgument = _genericTypeService.GetImplementationTypeArgument(route);
 
-        //This is now missing the flags
-        //Add the flags back in
-        var rightArgsList = rightArgs
-            .ToList();
-
-        rightArgsList.AddRange(flagsWithoutArgs);
-
-        var rightArgsWithFlags = rightArgsList.ToArray();
-
-        var genericValues = _genericValueFactory.Create(implementationTypeArgument, rightArgsWithFlags);
-
-        var constructorValues = genericValues
-            .Where(x => !x.IsFlag)
-            .ToList();
-
-        var flagValues = genericValues
-            .Where(x => x.IsFlag)
-            .ToList();
-
+        //Handle the constructor args
+        var constructorValues = _genericValueFactory.Create(implementationTypeArgument, rightArgs);
         var argsForConstructor = _objectFactory.Create(constructorValues);
-
-        var argsForFlags = _objectFactory.Create(flagValues);
-
         var request = _dynamicFactory.CreateInstance(implementationTypeArgument, argsForConstructor);
 
+        //Handle the Flags
+        var flagsWithoutArgs = _argsService.GetFlags(args);
+        var flagValuesList = _flagValueFactory.Create(flagsWithoutArgs);
+        var flagValues = _genericValueFactory.Create(implementationTypeArgument, flagValuesList);
+        var argsForFlags = _objectFactory.Create(flagValues);
         _objectMapper.MapFlagsOnto(request, flagValues, argsForFlags);
 
         await route.HandleAsync(request);

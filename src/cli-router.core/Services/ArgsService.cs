@@ -11,11 +11,6 @@ public class ArgsService : IArgsService
             .ToArray();
     }
 
-    private record PairedArgs(
-        string LeftArg,
-        string RightArg
-    );
-
     public string[] GetFlags(string[] allArgs)
     {
         var filteredArgs = new List<string>();

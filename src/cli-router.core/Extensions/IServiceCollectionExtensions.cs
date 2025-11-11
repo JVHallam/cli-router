@@ -45,6 +45,7 @@ public static class IServiceCollectionExtensions
             .AddSingleton<IFullyQualifiedRouteFactory, FullyQualifiedRouteFactory>()
             .AddSingleton<IGenericValueFactory, GenericValueFactory>()
             .AddSingleton<IObjectFactory, ObjectFactory>()
+            .AddSingleton<IFlagValueFactory, FlagValueFactory>()
         ;
     }
 
