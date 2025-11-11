@@ -48,6 +48,12 @@ public class RouteOrchestrator
 
     public async Task HandleAsync(string[] args)
     {
+        if(HasBuiltInSwitch(args))
+        {
+            await HandleBuiltInsAsync(args);
+            return;
+        }
+
         //Handle the routing
         var argsWithoutFlags = _argsService.RemoveFlags(args);
         var deepestKey = _routeKeyService.GetDeepestKey(_routes, argsWithoutFlags);
@@ -70,5 +76,24 @@ public class RouteOrchestrator
         _objectMapper.MapFlagsOnto(request, flagValues, argsForFlags);
 
         await route.HandleAsync(request);
+    }
+
+    private bool HasBuiltInSwitch(string[] args)
+    {
+        if(args.FirstOrDefault(x => x == "--help") != null)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private async Task HandleBuiltInsAsync(string[] args)
+    {
+        Console.WriteLine("Handling built in switches");
+        foreach(var arg in args)
+        {
+            Console.WriteLine(arg);
+        }
     }
 }
