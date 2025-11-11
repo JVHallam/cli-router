@@ -45,16 +45,28 @@ public class RouteOrchestrator
 
     public async Task HandleAsync(string[] args)
     {
-        var deepestKey = _routeKeyService.GetDeepestKey(_routes, args);
+        var argsWithoutFlags = _argsService.RemoveFlags(args);
+
+        var flagsWithoutArgs = _argsService.GetFlags(args);
+
+        var deepestKey = _routeKeyService.GetDeepestKey(_routes, argsWithoutFlags);
 
         var route = _routes[deepestKey]!;
 
-        var rightArgs = _argsService.GetRouteArgsWithoutRoute(deepestKey, args);
+        var rightArgs = _argsService.GetRouteArgsWithoutRoute(deepestKey, argsWithoutFlags);
 
-        //Now we need to convert that into an object, if the route requires it
         var implementationTypeArgument = _genericTypeService.GetImplementationTypeArgument(route);
 
-        var genericValues = _genericValueFactory.Create(implementationTypeArgument, rightArgs);
+        //This is now missing the flags
+        //Add the flags back in
+        var rightArgsList = rightArgs
+            .ToList();
+
+        rightArgsList.AddRange(flagsWithoutArgs);
+
+        var rightArgsWithFlags = rightArgsList.ToArray();
+
+        var genericValues = _genericValueFactory.Create(implementationTypeArgument, rightArgsWithFlags);
 
         var constructorValues = genericValues
             .Where(x => !x.IsFlag)

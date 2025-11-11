@@ -110,4 +110,50 @@ public class AllTests
         Assert.Equal(expectedFlag1, invocationArgs.Flag1);
         Assert.Equal(expectedFlag2, invocationArgs.Flag2);
     }
+
+    [Fact]
+    public async Task GivenACommandWithFlagsMixedIntoTheRoute_WhenHandleAsyncCalled_ThenParsesArgsAsExpected()
+    {
+        //Given
+        var args = new string[]{ 
+            //Flag isn't part of the route
+            "--flag-one",
+            "flagonevalue",
+
+            //Child is part of the route
+            "child", 
+
+            //Flag 2 isn't part of the route
+            "--flag-two",
+            "5",
+
+            //Flags Grand child is the final part of the route
+            "flags-grand-child",
+
+            //Args
+            "arg1",
+            "1"
+        };
+
+        var expectedArg1 = "arg1";
+        var expectedArg2 = 1;
+        var expectedFlag1 = "flagonevalue";
+        var expectedFlag2 = 5;
+
+        //When
+        await _sut.HandleAsync(args);
+
+        //Then
+        Assert.Single(_invocationTracker.Invocations);
+        
+        var invocation = _invocationTracker.Invocations.First();
+        var invokedTypeName = invocation.InvokedRoute.GetType().Name;
+        Assert.Equal("FlagsGrandChildRoute", invokedTypeName);
+
+        var invocationArgs = (invocation.Args as FlagsModel)!;
+        Assert.Equal(expectedArg1, invocationArgs.Arg1);
+        Assert.Equal(expectedArg2, invocationArgs.Arg2);
+        Assert.Equal(expectedFlag1, invocationArgs.Flag1);
+        Assert.Equal(expectedFlag2, invocationArgs.Flag2);
+    }
 }

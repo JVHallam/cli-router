@@ -18,6 +18,12 @@ When I call that route with the flags in any position
 Then the args are parsed onto the model and passed to the route
 (Implemented prior to 04/11/25)
 
+Scenario: I call help on a route
+Given a route
+When the route is called with the --help flag
+Then the help text is output, regardless of whether the args are correct
+And it tells me what args there are, what flags and what the datatypes for all of those are
+
 Scenario: I call a route that needs args, without the args
 Given a route with essential args
 When I call that route without any args
@@ -38,12 +44,6 @@ Scenario: I call a route with flags but don't provide args for the flags
 Given a route with flags
 When I call that route with the flags
 Then the route still executes but with the defaults for the flags
-
-Scenario: I call help on a route
-Given a route
-When the route is called with the --help flag
-Then the help text is output, regardless of whether the args are correct
-And it tells me what args there are, what flags and what the datatypes for all of those are
 
 Scenario: I call a route without sufficient args
 Given A route with args

@@ -1,8 +1,4 @@
 # TODO:
-- The mighty cleanup:
-    - Have a unit test class for every class, even if nothing is tested
-        - This will require getting rsis working for my needs
-
 - Requirements to finish before using this in next project:
     - Handle the flags better
         - In the RootRoute, convert the input "cli new test --flag arg --flag2 arg2 route final" into a model
