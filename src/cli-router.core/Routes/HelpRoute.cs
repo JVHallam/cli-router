@@ -29,9 +29,14 @@ public class HelpRoute : IBuiltInRoute
             Dictionary<string, ITemplatedRoute> routes,
             string[] allArgs)
     {
+        //Filter the routes, based on the args
+        var pairs = routes
+            .ToList()
+            .Where(pair => FilteredByArgs(pair, allArgs));
+
         //Output all the routes:
         Console.WriteLine("All Routes:");
-        foreach(var pair in routes)
+        foreach(var pair in pairs)
         {
             Console.WriteLine(" ");
             Console.WriteLine($"Route : {pair.Key}");
@@ -39,6 +44,31 @@ public class HelpRoute : IBuiltInRoute
         }
 
         return Task.CompletedTask;
+    }
+
+    private bool FilteredByArgs(
+        KeyValuePair<string, ITemplatedRoute> pair,
+        string[] allArgs
+    )
+    {
+        //Then it's just the --help flag
+        if(allArgs.Length == 1)
+        {
+            return true;
+        }
+
+        var argsWithoutHelp = allArgs
+            .Where(x => x != "--help");
+
+        var allArgsAsString = String.Join(" ", argsWithoutHelp);
+
+        //We want to filter for the routes with the matching input
+        if(pair.Key.Contains(allArgsAsString))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private void PrintInfo(ITemplatedRoute route)

@@ -158,13 +158,26 @@ public class AllTests
     }
 
     [Fact]
-    public async Task GivenHelpSwitchInArgs_WhenHandleAsyncCalled_ThenRunsBuiltInCommands()
+    public async Task GivenHelpSwitchWithNoOtherArgs_WhenHandleAsyncCalled_ThenRunsBuiltInCommands()
     {
         //Given
         var args = new string[]
         {
-            "one",
-            "two",
+            "--help"
+        };
+
+        //When
+        await _sut.HandleAsync(args);
+    }
+
+    [Fact]
+    public async Task GivenHelpSwitchWithRouteName_WhenHandleAsyncCalled_ThenRunsBuiltInCommands()
+    {
+        //Given
+        var args = new string[]
+        {
+            "child",
+            "grand-child",
             "--help"
         };
 
