@@ -22,6 +22,7 @@ public static class IServiceCollectionExtensions
         return services
             .AddSingleton<RouteOrchestrator>()
             .AddRoutes()
+            .AddBuiltInRoutes()
             .AddFactories()
             .AddServices()
         ;
@@ -33,6 +34,7 @@ public static class IServiceCollectionExtensions
         return services
             .AddSingleton<RouteOrchestrator>()
             .AddRoutes(assembly)
+            .AddBuiltInRoutes()
             .AddFactories()
             .AddServices()
         ;
@@ -62,6 +64,7 @@ public static class IServiceCollectionExtensions
     private static IServiceCollection AddRoutes(this IServiceCollection services, params Assembly[] assembly)
         => services.AddImplementationsOf<ITemplatedRoute>(assembly);
 
+
     private static IServiceCollection AddImplementationsOf<T>(this IServiceCollection services, params Assembly[] assemblies)
     {
         var allTypes = TypeFinder.GetAllTypes(assemblies);
@@ -77,5 +80,13 @@ public static class IServiceCollectionExtensions
         }
 
         return services;
+    }
+
+    private static IServiceCollection AddBuiltInRoutes(this IServiceCollection services)
+    {
+        return services
+            .AddSingleton<IBuiltInRouter, BuiltInRouter>()
+            .AddSingleton<IBuiltInRoute, HelpRoute>()
+        ;
     }
 }

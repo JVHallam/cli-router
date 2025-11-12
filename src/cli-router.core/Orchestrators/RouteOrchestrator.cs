@@ -16,6 +16,7 @@ public class RouteOrchestrator
     private IRouteKeyService _routeKeyService;
     private IArgsService _argsService;
     private IFlagValueFactory _flagValueFactory;
+    private IBuiltInRouter _builtInRouter;
 
     //TODO: Should a constructor be THIS complex?
     public RouteOrchestrator(
@@ -28,7 +29,8 @@ public class RouteOrchestrator
         IObjectMapper objectMapper,
         IRouteKeyService routeKeyService,
         IArgsService argsService,
-        IFlagValueFactory flagValueFactory
+        IFlagValueFactory flagValueFactory,
+        IBuiltInRouter builtInRouter
     )
     {
         _dynamicFactory = dynamicFactory;
@@ -39,6 +41,7 @@ public class RouteOrchestrator
         _routeKeyService = routeKeyService;
         _argsService = argsService;
         _flagValueFactory = flagValueFactory;
+        _builtInRouter = builtInRouter;
 
         //TODO: Also tolist when I can avoid it
         //This feels like something that should be done elsewhere
@@ -48,9 +51,9 @@ public class RouteOrchestrator
 
     public async Task HandleAsync(string[] args)
     {
-        if(HasBuiltInSwitch(args))
+        if(_builtInRouter.CanHandle(args))
         {
-            await HandleBuiltInsAsync(args);
+            await _builtInRouter.HandleAsync(_routes, args);
             return;
         }
 
@@ -76,24 +79,5 @@ public class RouteOrchestrator
         _objectMapper.MapFlagsOnto(request, flagValues, argsForFlags);
 
         await route.HandleAsync(request);
-    }
-
-    private bool HasBuiltInSwitch(string[] args)
-    {
-        if(args.FirstOrDefault(x => x == "--help") != null)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    private async Task HandleBuiltInsAsync(string[] args)
-    {
-        Console.WriteLine("Handling built in switches");
-        foreach(var arg in args)
-        {
-            Console.WriteLine(arg);
-        }
     }
 }
