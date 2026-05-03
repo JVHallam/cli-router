@@ -87,6 +87,7 @@ public static class IServiceCollectionExtensions
         return services
             .AddSingleton<IBuiltInRouter, BuiltInRouter>()
             .AddSingleton<IBuiltInRoute, HelpRoute>()
+            .AddSingleton<IBuiltInRoute, DefaultRoute>()
         ;
     }
 }

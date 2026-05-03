@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using CliRouter.Core.Extensions;
 using CliRouter.Core.Routes;
-using CliRouter.Console.Routes;
+using CliRouter.Core.Orchestrators;
 
 using System.Reflection;
 
@@ -14,7 +14,7 @@ using IHost host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 
-var router = host.Services.GetRequiredService<RootRoute>();
+var router = host.Services.GetRequiredService<RouteOrchestrator>();
 
 /* 
    Handle the commands:
