@@ -184,4 +184,26 @@ public class AllTests
         //When
         await _sut.HandleAsync(args);
     }
+
+    [Fact]
+    public async Task GivenFlagForNullableField_WhenHandleAsyncCalled_ThenSetsValuesOnArg()
+    {
+        //Arrange
+        var args = new string[]
+        {
+            "nullable",
+            "--NullableInt",
+            "1"
+        };
+
+        //Act
+        await _sut.HandleAsync(args);
+
+        //Assert
+        Assert.Single(_invocationTracker.Invocations);
+        
+        var invocation = _invocationTracker.Invocations.First();
+        var invokedTypeName = invocation.InvokedRoute.GetType().Name;
+        Assert.Equal("NullableRoute", invokedTypeName);
+    }
 }

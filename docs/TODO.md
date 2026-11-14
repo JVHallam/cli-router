@@ -11,6 +11,12 @@
     - Items returned from the route are serialized and printed as json automatically
     - That way routes only need to validate and fetch the object, not print it
 
+- Cleanup project structure:
+    - Why are we using NUnit and XUnit? go with xunit
+    - Fix the paths and names
+        - Use upper case names for paths
+        - Remove the hyphon from the names
+
 - Argless routes on arged routes
 I have the route
 ```

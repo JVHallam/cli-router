@@ -1,5 +1,6 @@
 using CliRouter.Core.Models;
 using System.Linq;
+using System.Globalization;
 
 namespace CliRouter.Core.Factories;
 
@@ -32,22 +33,43 @@ public class ObjectFactory : IObjectFactory
     {
         var (type, value, isFlag) = genericValue;
 
-        var typeCode = Type.GetTypeCode(type);
+        var underlyingType = GetUnderlyingType(genericValue);
 
-        var hasHandler = _handlers.TryGetValue(type, out var handler);
+        var hasHandler = _handlers.TryGetValue(underlyingType, out var handler);
 
-        if (!hasHandler)
+        if(underlyingType.IsEnum)
         {
-            throw new NotImplementedException($"Type : {type} not supported. Only built-in types supported");
+            Type underlying = Enum.GetUnderlyingType(underlyingType);
+            object number = Convert.ChangeType(value, underlying, CultureInfo.InvariantCulture);
+            return Enum.ToObject(underlyingType, number);
+        }
+
+        if (!hasHandler || handler == null)
+        {
+            throw new NotImplementedException($"Type : {type} not supported. Only built-in types and their nullables + enums are supported");
         }
 
         try
         {
-            return handler!(value);
+            return handler(value);
         }
         catch (FormatException ex)
         {
             throw new FormatException($"{value} - could not be parsed into type {type}", ex);
         }
+    }
+
+    private Type GetUnderlyingType(GenericValue genericValue)
+    {
+        var (type, _, __) = genericValue;
+
+        var underlyingType = Nullable.GetUnderlyingType(type);
+
+        if(underlyingType != null)
+        {
+            return underlyingType;
+        }
+
+        return genericValue.Type;
     }
 }
