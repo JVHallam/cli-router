@@ -48,10 +48,6 @@ That way my CLI feels more like a rest api than something I've hobbled together.
 - You can supply ONLY the expected number of args
     - if too many args are passed in for the model then you trigger the same errors as above
 
-- Support for enums
-    - You can't have an Enum on a request model. We only support built ins
-    - This can't be that bad, right?
-
 - Prettier help message
     - Atm it works but it doesn't feel very nice
     - It's not the easiest to read
